@@ -1,0 +1,140 @@
+openapi: 3.0.0
+info:
+  title: Topograph Billing Workspaces API
+  description: The Topograph API
+  version: '0.1'
+  contact: {}
+servers:
+- url: https://api.topograph.co
+security:
+- x-api-key: []
+tags:
+- name: Workspaces
+paths:
+  /v2/workspaces:
+    get:
+      operationId: WorkspaceController_listWorkspaces_v2
+      parameters: []
+      responses:
+        '200':
+          description: ''
+      security:
+      - x-api-key: []
+      summary: List all workspaces
+      tags:
+      - Workspaces
+    post:
+      operationId: WorkspaceController_createWorkspace_v2
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateWorkspaceDto'
+      responses:
+        '201':
+          description: ''
+      security:
+      - x-api-key: []
+      summary: Create a new workspace
+      tags:
+      - Workspaces
+  /v2/workspaces/{name}:
+    patch:
+      operationId: WorkspaceController_updateWorkspace_v2
+      parameters:
+      - name: name
+        required: true
+        in: path
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateWorkspaceDto'
+      responses:
+        '200':
+          description: ''
+      security:
+      - x-api-key: []
+      summary: Update a workspace
+      tags:
+      - Workspaces
+    delete:
+      operationId: WorkspaceController_deleteWorkspace_v2
+      parameters:
+      - name: name
+        required: true
+        in: path
+        schema:
+          type: string
+      responses:
+        '200':
+          description: ''
+      security:
+      - x-api-key: []
+      summary: Delete a workspace
+      tags:
+      - Workspaces
+  /v2/workspaces/usage:
+    get:
+      operationId: WorkspaceController_getUsageReport_v2
+      parameters:
+      - name: startDate
+        required: false
+        in: query
+        schema:
+          type: string
+      - name: endDate
+        required: false
+        in: query
+        schema:
+          type: string
+      - name: workspace
+        required: false
+        in: query
+        schema:
+          type: string
+      responses:
+        '200':
+          description: ''
+      security:
+      - x-api-key: []
+      summary: Get usage report per workspace
+      tags:
+      - Workspaces
+components:
+  schemas:
+    CreateWorkspaceDto:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Workspace identifier — unique within the account.
+          example: branch-paris
+          pattern: ^[a-zA-Z0-9_-]+$
+          maxLength: 64
+        legalName:
+          type: string
+          description: Display-friendly legal name used in reporting and invoices.
+          example: Acme Paris SAS
+          maxLength: 255
+      required:
+      - name
+      - legalName
+    UpdateWorkspaceDto:
+      type: object
+      properties:
+        legalName:
+          type: string
+          description: New display-friendly legal name.
+          example: Acme Paris SAS
+          maxLength: 255
+  securitySchemes:
+    x-api-key:
+      type: apiKey
+      in: header
+      name: x-api-key

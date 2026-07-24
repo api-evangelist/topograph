@@ -1,0 +1,640 @@
+openapi: 3.0.0
+info:
+  title: Topograph Billing Search API
+  description: The Topograph API
+  version: '0.1'
+  contact: {}
+servers:
+- url: https://api.topograph.co
+security:
+- x-api-key: []
+tags:
+- name: Search
+paths:
+  /v2/search:
+    get:
+      description: 'This endpoint allows you to search for companies based on a country code and a query string.
+
+
+        The search can be performed using either a company legal name, commercial name, historical name, or registration number. Capabilities vary by country.
+
+
+        **Standard Mode (stream=false or omitted):**
+
+        Returns JSON array of results once all search sources have completed.
+
+
+        **Streaming Mode (stream=true):**
+
+        Returns Server-Sent Events (SSE) with progressive results as each search source completes. The endpoint emits named events:
+
+        - `progress`: Partial results from completed sources
+
+        - `complete`: Final results when all sources finish
+
+        - `error`: If the search fails
+
+
+        Streaming is beneficial for countries with multiple search sources (e.g., Germany queries both Unternehmensregister and Handelsregister), providing faster time-to-first-result.
+
+
+        Response times vary by country: from sub-second to up to 10 seconds.'
+      operationId: SearchController_searchV2_v2
+      parameters:
+      - name: country
+        required: true
+        in: query
+        description: The country code in ISO 3166-1 alpha-2 format (e.g., "FR" for France, "DE" for Germany).
+        schema:
+          example: FR
+          type: string
+          enum:
+          - AT
+          - BE
+          - BG
+          - CH
+          - CN
+          - CZ
+          - CY
+          - DE
+          - DK
+          - EE
+          - ES
+          - FI
+          - FR
+          - GB
+          - GG
+          - GR
+          - HK
+          - HR
+          - HU
+          - IE
+          - IS
+          - IT
+          - JE
+          - LI
+          - LU
+          - LV
+          - MC
+          - MT
+          - MU
+          - NL
+          - 'NO'
+          - PL
+          - PT
+          - RO
+          - RU
+          - SE
+          - SG
+          - SI
+          - SK
+          - VG
+      - name: query
+        required: true
+        in: query
+        description: The search query, which can be a company name or registration number. Note that search capabilities may vary by country, with some supporting only name or registration number searches.
+        schema:
+          example: Topograph
+          type: string
+      - name: stream
+        required: false
+        in: query
+        description: Enable streaming mode. When true, returns Server-Sent Events (SSE) with progressive results as each search source completes. Set Accept header to "text/event-stream" for proper streaming. When false or omitted, returns standard JSON array after all sources complete.
+        schema:
+          example: true
+          type: boolean
+      - name: transliterate
+        required: false
+        in: query
+        description: 'When true, user-facing string fields in the response (company names, addresses, person names, activity descriptions) are romanized from their native script to Latin characters on the way out. Internal data, cache, and billing are unaffected — only the response payload is transformed. Routing: Cyrillic/Greek/Hangul/Hebrew/Arabic/Thai via unidecode, Chinese via pinyin-pro (toneless), Japanese via kuroshiro (Hepburn).'
+        schema:
+          example: false
+          type: boolean
+      responses:
+        '200':
+          description: List of companies (JSON when stream=false, SSE when stream=true)
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SearchResult'
+            text/event-stream:
+              schema:
+                type: string
+                description: 'Server-Sent Events stream with named events:
+
+                  - `progress`: Partial results as sources complete
+
+                  - `complete`: Final results when all sources finish
+
+                  - `error`: Error occurred'
+                example: 'event: progress
+
+                  data: {"results":[{"id":"123","legalName":"Company A","countryCode":"DE","address":{...}}]}
+
+
+                  event: complete
+
+                  data: {"results":[{"id":"123","legalName":"Company A",...},{"id":"456","legalName":"Company B",...}]}'
+        '400':
+          description: Bad Request - Invalid search query
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: number
+                    example: 400
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        example: invalid_request
+                      message:
+                        type: string
+                        example: Query is too short. Please provide at least 2 characters for company name search
+                      details:
+                        type: array
+                        items:
+                          type: string
+                        example:
+                        - Query must be at least 2 characters
+        '500':
+          description: Internal Server Error - Search failed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: number
+                    example: 500
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        example: service_unavailable
+                      message:
+                        type: string
+                        example: An error occurred while searching. Please try again later.
+      security:
+      - x-api-key: []
+      summary: Search for companies
+      tags:
+      - Search
+components:
+  schemas:
+    MatchReason:
+      type: object
+      properties:
+        matchType:
+          description: 'The type of match that produced this result. "id" means a guaranteed 1:1 match from an ID-based search (e.g., VAT number, CCIAA+REA). "exactLegalName" means the legal name exactly matches the search query. "partialId" means matched by a partial identifier that is not guaranteed unique (e.g., REA without CCIAA). "default" is used when the exact matching criteria is unknown. Results are ordered: id > exactLegalName > partialId > default.'
+          example: id
+          allOf:
+          - $ref: '#/components/schemas/MatchType'
+        identifier:
+          description: The identifier that matched this result. Present when matchType is "id" or "partialId". Shows which identifier type and value were used to find this company.
+          oneOf:
+          - $ref: '#/components/schemas/ItalyIdentifiers'
+            title: IT
+          - $ref: '#/components/schemas/FranceIdentifiers'
+            title: FR
+          example:
+            VAT: 02580590541
+      required:
+      - matchType
+    ItalyIdentifiers:
+      type: object
+      properties:
+        VAT:
+          type: string
+          description: 'Partita IVA (P.IVA) - VAT registration number. Format: 11 digits (e.g., "02580590541"). Issued by: Agenzia delle Entrate (Revenue Agency)'
+          example: 02580590541
+        Codice Fiscale:
+          type: string
+          description: 'Codice Fiscale - Tax identification code. Format: 16 alphanumeric characters for individuals (e.g., "RSSMRA70A01H501U"), 11 digits for companies (often same as VAT). Issued by: Agenzia delle Entrate (Revenue Agency)'
+          example: RSSMRA70A01H501U
+        CCIAA:
+          type: string
+          description: 'CCIAA - Camera di Commercio (Chamber of Commerce) province code. Format: 2-letter province code (e.g., "TO" for Torino, "MI" for Milano). Indicates which Chamber of Commerce the company is registered with.'
+          example: TO
+        REA Code:
+          type: string
+          description: 'REA Code - Registro Economico Amministrativo (Economic Administrative Register) number. Format: Numeric (e.g., "1234567"). Unique within each CCIAA province. Combined with CCIAA forms a unique identifier.'
+          example: '1234567'
+      description: Identifiers for Italian companies (IT)
+    AddressDTO:
+      type: object
+      properties:
+        addressLine1:
+          type: string
+          description: First line of the address
+          example: 10 rue de la Fraternité
+        addressLine2:
+          type: string
+          description: Second line of the address
+          example: Topograph Building
+        city:
+          type: string
+          description: City of the address
+          example: Bagnolet
+        postalCode:
+          type: string
+          description: Postal code of the address
+          example: '93170'
+        region:
+          type: string
+          description: Region of the address
+          example: FR
+        countryCode:
+          type: string
+          description: Country of the address using ISO 3166-1 alpha-2 country code
+          example: FR
+        poBox:
+          type: string
+          description: Post Office Box number
+          example: PO Box 123
+        careOf:
+          type: string
+          description: Care of (c/o) recipient
+          example: c/o John Doe
+        state:
+          type: string
+          description: State of the address
+          example: Île-de-France
+        latitude:
+          type: number
+          description: Latitude coordinate
+          example: 59.9139
+        longitude:
+          type: number
+          description: Longitude coordinate
+          example: 10.7522
+    MatchType:
+      type: string
+      enum:
+      - id
+      - exactLegalName
+      - partialId
+      - default
+      description: 'The type of match that produced this result. "id" means a guaranteed 1:1 match from an ID-based search (e.g., VAT number, CCIAA+REA). "exactLegalName" means the legal name exactly matches the search query. "partialId" means matched by a partial identifier that is not guaranteed unique (e.g., REA without CCIAA). "default" is used when the exact matching criteria is unknown. Results are ordered: id > exactLegalName > partialId > default.'
+    SearchResult:
+      type: object
+      properties:
+        address:
+          description: The legal address of the company
+          allOf:
+          - $ref: '#/components/schemas/AddressDTO'
+        id:
+          type: string
+          example: '932884117'
+          description: 'The company number. In some countries, this might be a concatenation of the registry and city (e.g., in Germany: "Augsburg HRB 34617"). The search function will always return a usable company number. Check the documentation to see which number format is used for each country.'
+        legalName:
+          type: string
+          description: Legal name of the company
+          example: SEMAPHORE
+        legalNameInEnglish:
+          type: string
+          example: Test Display Hong Kong Trading Limited
+          description: The English translation or romanization of the legal name, commonly used for international business. Particularly relevant for companies registered with non-Latin alphabet names (e.g., Chinese, Japanese, Korean, etc.).
+        companyNameTransliterations:
+          example:
+          - Naftogaz
+          - Naftohaz
+          description: 'Deterministic Latin transliterations of the company name, computed using per-country standards (e.g. UA: GOST + KMU 55 + ISO 9). Useful for displaying alternative Latin spellings alongside the original-script `legalName`. Absent or empty for Latin-script companies and for non-Latin countries not yet covered.'
+          type: array
+          items:
+            type: string
+        countryCode:
+          type: string
+          enum:
+          - AF
+          - AX
+          - AL
+          - DZ
+          - AS
+          - AD
+          - AO
+          - AI
+          - AQ
+          - AG
+          - AR
+          - AM
+          - AW
+          - AU
+          - AT
+          - AZ
+          - BS
+          - BH
+          - BD
+          - BB
+          - BY
+          - BE
+          - BZ
+          - BJ
+          - BM
+          - BT
+          - BO
+          - BQ
+          - BA
+          - BW
+          - BV
+          - BR
+          - IO
+          - BN
+          - BG
+          - BF
+          - BI
+          - KH
+          - CM
+          - CA
+          - CV
+          - KY
+          - CF
+          - TD
+          - CL
+          - CN
+          - CX
+          - CC
+          - CO
+          - KM
+          - CG
+          - CD
+          - CK
+          - CR
+          - CI
+          - HR
+          - CU
+          - CW
+          - CY
+          - CZ
+          - DK
+          - DJ
+          - DM
+          - DO
+          - EC
+          - EG
+          - SV
+          - GQ
+          - ER
+          - EE
+          - ET
+          - FK
+          - FO
+          - FJ
+          - FI
+          - FR
+          - GF
+          - PF
+          - TF
+          - GA
+          - GM
+          - GE
+          - DE
+          - GH
+          - GI
+          - GR
+          - GL
+          - GD
+          - GP
+          - GU
+          - GT
+          - GG
+          - GN
+          - GW
+          - GY
+          - HT
+          - HM
+          - VA
+          - HN
+          - HK
+          - HU
+          - IS
+          - IN
+          - ID
+          - IR
+          - IQ
+          - IE
+          - IM
+          - IL
+          - IT
+          - JM
+          - JP
+          - JE
+          - JO
+          - KZ
+          - KE
+          - KI
+          - KR
+          - KP
+          - KW
+          - KG
+          - LA
+          - LV
+          - LB
+          - LS
+          - LR
+          - LY
+          - LI
+          - LT
+          - LU
+          - MO
+          - MK
+          - MG
+          - MW
+          - MY
+          - MV
+          - ML
+          - MT
+          - MH
+          - MQ
+          - MR
+          - MU
+          - YT
+          - MX
+          - FM
+          - MD
+          - MC
+          - MN
+          - ME
+          - MS
+          - MA
+          - MZ
+          - MM
+          - NA
+          - NR
+          - NP
+          - NL
+          - NC
+          - NZ
+          - NI
+          - NE
+          - NG
+          - NU
+          - NF
+          - MP
+          - 'NO'
+          - OM
+          - PK
+          - PW
+          - PS
+          - PA
+          - PG
+          - PY
+          - PE
+          - PH
+          - PN
+          - PL
+          - PT
+          - PR
+          - QA
+          - RE
+          - RO
+          - RU
+          - RW
+          - BL
+          - SH
+          - KN
+          - LC
+          - MF
+          - PM
+          - VC
+          - WS
+          - SM
+          - ST
+          - SA
+          - SN
+          - RS
+          - SC
+          - SL
+          - SG
+          - SX
+          - SK
+          - SI
+          - SB
+          - SO
+          - ZA
+          - GS
+          - SS
+          - ES
+          - LK
+          - SD
+          - SR
+          - SJ
+          - SZ
+          - SE
+          - CH
+          - SY
+          - TW
+          - TJ
+          - TZ
+          - TH
+          - TL
+          - TG
+          - TK
+          - TO
+          - TT
+          - TN
+          - TR
+          - TM
+          - TC
+          - TV
+          - UG
+          - UA
+          - AE
+          - GB
+          - US
+          - UM
+          - UY
+          - UZ
+          - VU
+          - VE
+          - VN
+          - VG
+          - VI
+          - WF
+          - EH
+          - YE
+          - ZM
+          - ZW
+          - US-FL
+          - US-CO
+          - US-IL
+          - US-MA
+          - US-MD
+          - US-MI
+          - US-NJ
+          - US-NY
+          - US-OH
+          - US-TX
+          - US-DE
+          - US-WA
+          - US-TN
+          - US-WY
+          - US-GA
+          - US-MN
+          - US-MO
+          - US-NV
+          - US-PA
+          - US-CT
+          - US-UT
+          - US-IA
+          - US-AZ
+          - US-VA
+          - US-MS
+          - US-CA
+          - US-OR
+          - US-KY
+          - US-NE
+          - US-NC
+          - US-AR
+          - US-WI
+          - US-SC
+          - TEST
+          example: FR
+          description: The country code in ISO 3166-1 alpha-2 format (e.g., "FR" for France, "DE" for Germany).
+        matchReason:
+          description: Match reason containing information about why this result was returned. Includes the match type and which identifier matched for ID matches.
+          example:
+            matchType: default
+          allOf:
+          - $ref: '#/components/schemas/MatchReason'
+      required:
+      - address
+      - id
+      - legalName
+      - countryCode
+      - matchReason
+    FranceIdentifiers:
+      type: object
+      properties:
+        siren:
+          type: string
+          description: 'SIREN - Système d''Identification du Répertoire des Entreprises. Format: 9 digits (e.g., "443061841"). Issued by: INSEE (Institut National de la Statistique et des Études Économiques). This is the primary company identifier in France.'
+          example: '443061841'
+        siret:
+          type: string
+          description: 'SIRET - Système d''Identification du Répertoire des Établissements. Format: 14 digits = SIREN (9) + NIC (5) (e.g., "44306184100047"). Identifies a specific establishment (location) of a company. Issued by: INSEE.'
+          example: '44306184100047'
+        VAT:
+          type: string
+          description: 'TVA Intracommunautaire - French VAT number. Format: FR + 2 check digits + SIREN (e.g., "FR27443061841"). Issued by: Direction Générale des Finances Publiques (DGFiP). Required for EU cross-border transactions.'
+          example: FR27443061841
+        rna:
+          type: string
+          description: 'RNA - Répertoire National des Associations. Format: W + 9 digits (e.g., "W751234567"). Identifies associations registered in mainland France. Issued by: Préfecture.'
+          example: W751234567
+        rnaAlsaceMoselle:
+          type: string
+          description: 'RNA Alsace-Moselle - Special identifier for associations in the Alsace-Moselle region. Format: Letter + year + code + number (e.g., "A2002THI000075"). These associations are registered under local law (droit local).'
+          example: A2002THI000075
+      description: Identifiers for French companies (FR)
+  securitySchemes:
+    x-api-key:
+      type: apiKey
+      in: header
+      name: x-api-key

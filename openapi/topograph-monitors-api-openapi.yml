@@ -1,0 +1,465 @@
+openapi: 3.0.0
+info:
+  title: Topograph Billing Monitors API
+  description: The Topograph API
+  version: '0.1'
+  contact: {}
+servers:
+- url: https://api.topograph.co
+security:
+- x-api-key: []
+tags:
+- name: Monitors
+paths:
+  /v2/monitors:
+    post:
+      operationId: MonitoringController_createMonitor_v2
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateMonitorDto'
+      responses:
+        '201':
+          description: Monitor created or retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateMonitorResponseDto'
+        '400':
+          description: Invalid request or monitoring not supported for country
+        '401':
+          description: Invalid or missing API key
+      security:
+      - x-api-key: []
+      summary: Add monitoring for a company
+      tags:
+      - Monitors
+    get:
+      operationId: MonitoringController_listMonitors_v2
+      parameters:
+      - name: companyId
+        required: false
+        in: query
+        description: Filter by company ID
+        schema:
+          example: '123456789'
+          type: string
+      - name: countryCode
+        required: false
+        in: query
+        description: Filter by country code (ISO 2-letter)
+        schema:
+          example: DE
+          type: string
+          enum:
+          - AT
+          - BE
+          - BG
+          - CH
+          - CN
+          - CZ
+          - CY
+          - DE
+          - DK
+          - EE
+          - ES
+          - FI
+          - FR
+          - GB
+          - GG
+          - GR
+          - HK
+          - HR
+          - HU
+          - IE
+          - IS
+          - IT
+          - JE
+          - LI
+          - LU
+          - LV
+          - MC
+          - MT
+          - MU
+          - NL
+          - 'NO'
+          - PL
+          - PT
+          - RO
+          - RU
+          - SE
+          - SG
+          - SI
+          - SK
+          - VG
+      - name: after
+        required: false
+        in: query
+        description: Cursor for pagination
+        schema:
+          example: cmfzlu1dt000j12ldeqrfszq0
+          type: string
+      - name: first
+        required: false
+        in: query
+        description: 'Number of items to fetch (default: 50)'
+        schema:
+          minimum: 1
+          example: 25
+          type: number
+      responses:
+        '200':
+          description: List of monitors
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListMonitorsResponseDto'
+        '401':
+          description: Invalid or missing API key
+      security:
+      - x-api-key: []
+      summary: List monitored companies
+      tags:
+      - Monitors
+  /v2/monitors/{id}:
+    get:
+      operationId: MonitoringController_getMonitor_v2
+      parameters:
+      - name: id
+        required: true
+        in: path
+        description: Monitor ID
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Monitor details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MonitorDetailsResponseDto'
+        '401':
+          description: Invalid or missing API key
+        '404':
+          description: Monitor not found or access denied
+      security:
+      - x-api-key: []
+      summary: Get monitor details
+      tags:
+      - Monitors
+    delete:
+      operationId: MonitoringController_stopMonitoring_v2
+      parameters:
+      - name: id
+        required: true
+        in: path
+        description: Monitor ID to stop
+        schema:
+          type: string
+      responses:
+        '204':
+          description: Monitor deleted successfully
+        '401':
+          description: Invalid or missing API key
+        '404':
+          description: Monitor not found or access denied
+      security:
+      - x-api-key: []
+      summary: Stop monitoring a company
+      tags:
+      - Monitors
+  /v2/monitors/{id}/logs:
+    get:
+      operationId: MonitoringController_getMonitorLogs_v2
+      parameters:
+      - name: id
+        required: true
+        in: path
+        description: Monitor ID
+        schema:
+          type: string
+      - name: first
+        required: false
+        in: query
+        description: 'Number of items to fetch (default: 25)'
+        schema:
+          type: number
+      - name: after
+        required: false
+        in: query
+        description: Cursor for pagination
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Monitor change logs
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MonitorLogsResponseDto'
+        '401':
+          description: Invalid or missing API key
+        '404':
+          description: Monitor not found or access denied
+      security:
+      - x-api-key: []
+      summary: Get monitor change logs
+      tags:
+      - Monitors
+components:
+  schemas:
+    MonitorDetailsResponseDto:
+      type: object
+      properties:
+        id:
+          type: string
+          description: The unique identifier for the monitor
+          example: cmfzlu1dt000j12ldeqrfszq0
+        companyId:
+          type: string
+          description: The company ID being monitored
+          example: '123456789'
+        countryCode:
+          type: string
+          description: The country code for the monitored company
+          example: DE
+        lastFetchedAt:
+          type: string
+          description: When the monitor data was last fetched
+          example: '2026-03-20T02:00:00.000Z'
+          nullable: true
+        createdAt:
+          type: string
+          description: When the monitor was created
+          example: '2026-01-15T10:30:00.000Z'
+        companyName:
+          type: string
+          description: The legal name of the monitored company
+          example: Topograph SAS
+          nullable: true
+        metadata:
+          type: object
+          additionalProperties:
+            type: string
+          example:
+            caseId: case-12345
+          description: Key-value pairs provided at monitor creation, echoed back in responses and monitor.notification webhooks.
+      required:
+      - id
+      - companyId
+      - countryCode
+      - createdAt
+    MonitorDto:
+      type: object
+      properties:
+        id:
+          type: string
+          description: The unique identifier for the monitor
+          example: cmfzlu1dt000j12ldeqrfszq0
+        companyId:
+          type: string
+          description: The company ID being monitored
+          example: '123456789'
+        countryCode:
+          type: string
+          description: The country code for the monitored company
+          example: DE
+        companyName:
+          type: string
+          description: The legal name of the monitored company
+          example: Topograph SAS
+          nullable: true
+        metadata:
+          type: object
+          additionalProperties:
+            type: string
+          example:
+            caseId: case-12345
+          description: Key-value pairs provided at monitor creation, echoed back in responses and monitor.notification webhooks.
+      required:
+      - id
+      - companyId
+      - countryCode
+    MonitorLogsResponseDto:
+      type: object
+      properties:
+        logs:
+          description: List of monitor log entries
+          type: array
+          items:
+            $ref: '#/components/schemas/MonitorLogDto'
+        hasNextPage:
+          type: boolean
+          description: Whether there is a next page available
+          example: true
+        nextCursor:
+          type: string
+          description: Cursor for the next page
+          example: cmfzlu1dt000j12ldeqrfszq0
+      required:
+      - logs
+      - hasNextPage
+    CreateMonitorResponseDto:
+      type: object
+      properties:
+        id:
+          type: string
+          description: The unique identifier for the monitor
+          example: cmfzlu1dt000j12ldeqrfszq0
+        companyId:
+          type: string
+          description: The company ID being monitored
+          example: '123456789'
+        countryCode:
+          type: string
+          description: The country code for the monitored company
+          example: DE
+        metadata:
+          type: object
+          additionalProperties:
+            type: string
+          example:
+            caseId: case-12345
+          description: Key-value pairs provided at monitor creation, echoed back in responses and monitor.notification webhooks.
+      required:
+      - id
+      - companyId
+      - countryCode
+    ListMonitorsResponseDto:
+      type: object
+      properties:
+        monitors:
+          description: List of monitored companies
+          type: array
+          items:
+            $ref: '#/components/schemas/MonitorDto'
+        total:
+          type: number
+          description: Total number of monitors
+          example: 10
+        hasNextPage:
+          type: boolean
+          description: Whether there is a next page available
+          example: true
+        nextCursor:
+          type: string
+          description: Cursor for the next page
+          example: cmfzlu1dt000j12ldeqrfszq0
+      required:
+      - monitors
+      - total
+      - hasNextPage
+    MonitorLogDto:
+      type: object
+      properties:
+        id:
+          type: string
+          description: The unique identifier for the log entry
+          example: cmfzlu1dt000j12ldeqrfszq0
+        changeDetected:
+          type: boolean
+          description: Whether a change was detected in this check
+          example: true
+        changeCategories:
+          description: Categories of detected changes
+          example:
+          - status
+          - address
+          type: array
+          items:
+            type: string
+        fetchStatus:
+          type: string
+          description: Status of the fetch operation
+          example: success
+          enum:
+          - success
+          - not_found
+          - error
+          - error_final
+        errorMessage:
+          type: string
+          description: Error message if the fetch failed
+          example: null
+          nullable: true
+        createdAt:
+          type: string
+          description: When this log entry was created
+          example: '2026-03-20T02:00:00.000Z'
+      required:
+      - id
+      - changeDetected
+      - changeCategories
+      - fetchStatus
+      - createdAt
+    CreateMonitorDto:
+      type: object
+      properties:
+        companyId:
+          type: string
+          description: The company ID to monitor
+          example: '123456789'
+        countryCode:
+          type: string
+          description: The country code for the company
+          enum:
+          - AT
+          - BE
+          - BG
+          - CH
+          - CN
+          - CZ
+          - CY
+          - DE
+          - DK
+          - EE
+          - ES
+          - FI
+          - FR
+          - GB
+          - GG
+          - GR
+          - HK
+          - HR
+          - HU
+          - IE
+          - IS
+          - IT
+          - JE
+          - LI
+          - LU
+          - LV
+          - MC
+          - MT
+          - MU
+          - NL
+          - 'NO'
+          - PL
+          - PT
+          - RO
+          - RU
+          - SE
+          - SG
+          - SI
+          - SK
+          - VG
+          example: DE
+        metadata:
+          type: object
+          additionalProperties:
+            type: string
+            maxLength: 500
+          example:
+            caseId: case-12345
+          description: 'Arbitrary key-value string pairs to associate with the monitor, echoed back in monitor responses and in every monitor.notification webhook. Use it to map notifications back to your internal records (e.g. a case ID). Calling POST /v2/monitors again for the same company replaces the stored metadata when the field is provided. Limits: max 50 keys, keys up to 40 chars (longer keys are skipped), values up to 500 chars (longer values are truncated).'
+      required:
+      - companyId
+      - countryCode
+  securitySchemes:
+    x-api-key:
+      type: apiKey
+      in: header
+      name: x-api-key

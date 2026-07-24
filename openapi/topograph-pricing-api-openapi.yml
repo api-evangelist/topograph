@@ -1,0 +1,203 @@
+openapi: 3.0.0
+info:
+  title: Topograph Billing Pricing API
+  description: The Topograph API
+  version: '0.1'
+  contact: {}
+servers:
+- url: https://api.topograph.co
+security:
+- x-api-key: []
+tags:
+- name: Pricing
+paths:
+  /v2/pricing:
+    get:
+      description: 'Returns pricing for a specific country.
+
+
+        The response includes:
+
+        - blocks: SKUs, datapoint coverage, verification and onboarding mode prices (with an authoritative hint), and optional includedDocuments
+
+        - Flat fields: per-datapoint availability and prices (legacy companyProfile included)
+
+        - Company search and availableDocuments listing are free
+
+
+        Prices are in credits (account balance units). Rates may vary by subscription plan.'
+      operationId: PricingController_getPricing_v2
+      parameters:
+      - name: countryCode
+        required: true
+        in: query
+        description: The country code in ISO 3166-1 alpha-2 format (e.g., "FR" for France, "DE" for Germany).
+        schema:
+          example: FR
+          type: string
+          enum:
+          - AT
+          - BE
+          - BG
+          - CH
+          - CN
+          - CZ
+          - CY
+          - DE
+          - DK
+          - EE
+          - ES
+          - FI
+          - FR
+          - GB
+          - GG
+          - GR
+          - HK
+          - HR
+          - HU
+          - IE
+          - IS
+          - IT
+          - JE
+          - LI
+          - LU
+          - LV
+          - MC
+          - MT
+          - MU
+          - NL
+          - 'NO'
+          - PL
+          - PT
+          - RO
+          - RU
+          - SE
+          - SG
+          - SI
+          - SK
+          - VG
+      responses:
+        '200':
+          description: Pricing information retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetPricingResultDTO'
+      security:
+      - x-api-key: []
+      summary: Get pricing for a country
+      tags:
+      - Pricing
+components:
+  schemas:
+    GetPricingResultDTO:
+      type: object
+      properties:
+        blocks:
+          description: Data blocks with per-mode pricing, datapoint coverage, and included documents
+          type: array
+          items:
+            $ref: '#/components/schemas/PricingBlockDTO'
+        companyProfile:
+          description: Company profile pricing (legacy, maps to company + legalRepresentatives block)
+          allOf:
+          - $ref: '#/components/schemas/PricingAndAvailabilityDTO'
+        company:
+          description: Company data pricing
+          allOf:
+          - $ref: '#/components/schemas/PricingAndAvailabilityDTO'
+        legalRepresentatives:
+          description: Legal representatives pricing (included in company block)
+          allOf:
+          - $ref: '#/components/schemas/PricingAndAvailabilityDTO'
+        otherKeyPersons:
+          description: Other key persons pricing (included in company block)
+          allOf:
+          - $ref: '#/components/schemas/PricingAndAvailabilityDTO'
+        establishments:
+          description: Establishments pricing (included in company block)
+          allOf:
+          - $ref: '#/components/schemas/PricingAndAvailabilityDTO'
+        ultimateBeneficialOwners:
+          description: Ultimate beneficial owners pricing
+          allOf:
+          - $ref: '#/components/schemas/PricingAndAvailabilityDTO'
+        shareholders:
+          description: Shareholders pricing
+          allOf:
+          - $ref: '#/components/schemas/PricingAndAvailabilityDTO'
+        subsidiaries:
+          description: Subsidiaries pricing (downstream equity participations)
+          allOf:
+          - $ref: '#/components/schemas/PricingAndAvailabilityDTO'
+        availableDocuments:
+          description: Available documents (always free)
+          allOf:
+          - $ref: '#/components/schemas/PricingAndAvailabilityDTO'
+        graph:
+          description: Ownership graph pricing
+          allOf:
+          - $ref: '#/components/schemas/PricingAndAvailabilityDTO'
+        monitoring:
+          type: object
+          description: Datapoints auto-monitored at zero cost (derived from zero-cost blocks)
+      required:
+      - blocks
+      - companyProfile
+      - ultimateBeneficialOwners
+      - availableDocuments
+    PricingBlockDTO:
+      type: object
+      properties:
+        sku:
+          type: string
+          description: Block SKU identifier
+          example: ita-company-data
+        datapoints:
+          description: Datapoints covered by this block
+          example:
+          - company
+          - legalRepresentatives
+          type: array
+          items:
+            type: string
+        modes:
+          type: object
+          description: Pricing per mode. null means the block is not available in that mode.
+        includedDocuments:
+          description: Document types included free when this block is purchased
+          example:
+          - trade_register_extract
+          type: array
+          items:
+            type: string
+      required:
+      - sku
+      - datapoints
+      - modes
+    PricingAndAvailabilityDTO:
+      type: object
+      properties:
+        available:
+          type: boolean
+          description: Whether the data point is available for this country
+          example: true
+        price:
+          type: number
+          description: The price in credits for this data point (verification mode)
+          example: 1.5
+        pricingMode:
+          type: string
+          description: Whether the price is fixed or variable (determined at request time). Omitted when fixed.
+          example: variable
+          enum:
+          - fixed
+          - variable
+      required:
+      - available
+      - price
+  securitySchemes:
+    x-api-key:
+      type: apiKey
+      in: header
+      name: x-api-key

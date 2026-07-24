@@ -1,0 +1,106 @@
+openapi: 3.0.0
+info:
+  title: Topograph Billing API
+  description: The Topograph API
+  version: '0.1'
+  contact: {}
+servers:
+- url: https://api.topograph.co
+security:
+- x-api-key: []
+tags:
+- name: Billing
+paths:
+  /v2/billing/balance:
+    get:
+      description: Returns the account's remaining credit balance, a derived health status, the auto-topup posture, and the configured low-balance thresholds. This is the remaining balance — for consumption use GET /v2/workspaces/usage.
+      operationId: BillingBalanceController_getBalance_v2
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BalanceResponseDto'
+      security:
+      - x-api-key: []
+      summary: Get the current account credit balance
+      tags:
+      - Billing
+components:
+  schemas:
+    LowBalanceTierDto:
+      type: object
+      properties:
+        tier:
+          type: string
+          description: Severity tier name. Must be unique within the array.
+          enum:
+          - warning
+          - critical
+          - depleted
+          example: warning
+        cents:
+          type: number
+          description: Threshold in cents (integer, same currency as the account). A notification fires when the account balance drops at or below this value.
+          example: 100000
+          minimum: 0
+      required:
+      - tier
+      - cents
+    AutoTopupSummaryDto:
+      type: object
+      properties:
+        enabled:
+          type: boolean
+          description: Whether the account auto-recharges when the balance drops below the threshold.
+          example: true
+        thresholdInCreditCents:
+          type: number
+          description: Balance (in credit cents) at or below which an auto-topup is triggered.
+          example: 5000
+          minimum: 0
+        amountInCreditCents:
+          type: number
+          description: Amount (in credit cents) added to the balance on each auto-topup.
+          example: 10000
+          minimum: 0
+      required:
+      - enabled
+      - thresholdInCreditCents
+      - amountInCreditCents
+    BalanceResponseDto:
+      type: object
+      properties:
+        balanceInCreditCents:
+          type: number
+          description: Current remaining account balance, in credit cents.
+          example: 42350
+        status:
+          type: string
+          description: Derived health of the balance. `depleted` when the balance is at or below zero (new work is blocked); `low` when it is at or below the highest configured low-balance threshold; otherwise `ok`.
+          enum:
+          - ok
+          - low
+          - depleted
+          example: ok
+        autoTopup:
+          description: Read-only auto-topup posture for the account.
+          allOf:
+          - $ref: '#/components/schemas/AutoTopupSummaryDto'
+        lowBalanceThresholds:
+          description: Resolved low-balance thresholds. A low_balance notification fires when the balance drops at or below a tier. Returned here so a client can interpret `status` and surface the same thresholds it is alerted on.
+          type: array
+          items:
+            $ref: '#/components/schemas/LowBalanceTierDto'
+      required:
+      - balanceInCreditCents
+      - status
+      - autoTopup
+      - lowBalanceThresholds
+  securitySchemes:
+    x-api-key:
+      type: apiKey
+      in: header
+      name: x-api-key
