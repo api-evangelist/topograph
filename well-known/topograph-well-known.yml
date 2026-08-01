@@ -1,0 +1,32 @@
+generated: '2026-07-21'
+method: searched
+source: live probe of /.well-known/ on Topograph hosts
+hosts:
+- host: https://api.topograph.co
+  documents:
+  - path: /.well-known/oauth-authorization-server
+    status: 200
+    file: topograph-oauth-authorization-server.json
+    note: RFC 8414 metadata; authorization server is Clerk (clerk.topograph.co), used by the designer/MCP OAuth 2.1 flow
+  - path: /.well-known/security.txt
+    status: 404
+  - path: /.well-known/openid-configuration
+    status: 404
+  - path: /.well-known/api-catalog
+    status: 404
+  - path: /.well-known/ai-plugin.json
+    status: 404
+- host: https://topograph.co
+  documents:
+  - path: /.well-known/api-catalog
+    status: 200
+    file: topograph-api-catalog.json
+    note: RFC 9727 linkset; advertises the main OpenAPI (docs.topograph.co/openapi.json), the x402 agentic-commerce OpenAPI, docs, and status endpoints
+  - path: /.well-known/security.txt
+    status: 404
+  - path: /.well-known/openid-configuration
+    status: 404
+  - path: /.well-known/oauth-authorization-server
+    status: 404
+  - path: /.well-known/ai-plugin.json
+    status: 404

@@ -1,0 +1,42 @@
+generated: '2026-07-21'
+method: derived
+source: openapi/topograph-openapi-original.json
+format: custom
+rfc9457: false
+envelope:
+  shape: '{ statusCode: number, error: { code: string, message: string } }'
+  example: '{ "statusCode": 400, "error": { "code": "invalid_request", "message": "..." } }'
+  note: >-
+    Errors are NOT application/problem+json (RFC 9457). Search returns the structured envelope
+    above (application/json); several monitor/company endpoints document the status code and a
+    human description without a typed body.
+problems:
+- status: 400
+  code: invalid_request
+  title: Bad request / invalid search query
+  remediation: Validate country code and query parameters; monitoring may not be supported for the company.
+  source_operations:
+  - openapi/topograph-openapi-original.json#SearchController_searchV2_v2
+  - openapi/topograph-openapi-original.json#MonitoringController_createMonitor_v2
+- status: 401
+  title: Invalid or missing API key
+  remediation: Send a valid workspace key in the x-api-key header.
+  source_operations:
+  - openapi/topograph-openapi-original.json#MonitoringController_createMonitor_v2
+  - openapi/topograph-openapi-original.json#MonitoringController_listMonitors_v2
+  - openapi/topograph-openapi-original.json#MonitoringController_getMonitor_v2
+  - openapi/topograph-openapi-original.json#MonitoringController_stopMonitoring_v2
+  - openapi/topograph-openapi-original.json#MonitoringController_getMonitorLogs_v2
+- status: 404
+  title: Resource not found or access denied
+  remediation: The monitor id / requestId does not exist or does not belong to this account.
+  source_operations:
+  - openapi/topograph-openapi-original.json#MonitoringController_getMonitor_v2
+  - openapi/topograph-openapi-original.json#MonitoringController_stopMonitoring_v2
+  - openapi/topograph-openapi-original.json#MonitoringController_getMonitorLogs_v2
+  - openapi/topograph-openapi-original.json#CompanyController_getCompanyRequest_v2
+- status: 500
+  title: Internal server error / search failed
+  remediation: Retry; if persistent, contact support.
+  source_operations:
+  - openapi/topograph-openapi-original.json#SearchController_searchV2_v2

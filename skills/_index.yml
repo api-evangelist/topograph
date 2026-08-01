@@ -1,0 +1,17 @@
+generated: '2026-07-21'
+method: generated
+source: openapi/topograph-openapi-original.json + docs.topograph.co
+api: openapi/topograph-openapi-original.json
+skills:
+- file: topograph-search-and-retrieve.md
+  name: Resolve a company and retrieve KYB data
+  api: openapi/topograph-openapi-original.json
+  operations: [SearchController_searchV2_v2, CompanyController_getCompany_v2, CompanyController_getCompanyRequest_v2]
+- file: topograph-ownership-graph.md
+  name: Retrieve ownership, UBOs and subsidiaries
+  api: openapi/topograph-openapi-original.json
+  operations: [CompanyController_getCompany_v2, CompanyController_getCompanyRequest_v2]
+- file: topograph-monitor-company.md
+  name: Monitor a company for register changes
+  api: openapi/topograph-openapi-original.json
+  operations: [MonitoringController_createMonitor_v2, MonitoringController_listMonitors_v2, MonitoringController_getMonitorLogs_v2, MonitoringController_stopMonitoring_v2]

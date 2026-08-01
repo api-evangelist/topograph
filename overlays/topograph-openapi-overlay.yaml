@@ -1,0 +1,28 @@
+overlay: 1.0.0
+info:
+  title: API Evangelist enhancements for Topograph
+  version: 1.0.0
+extends: openapi/topograph-openapi-original.json
+actions:
+- target: $.info
+  update:
+    x-apievangelist-rating: 4
+    x-apievangelist-category: KYB / company data
+    x-apievangelist-notes: >-
+      Real-time KYB data platform over official business registers. API-key auth (x-api-key),
+      cursor pagination, natural-key idempotency (24h dedup window), account-level webhooks
+      (monitor.notification), a published MCP server, and SOC 2 Type 2 / ISO 27001:2022 posture.
+- target: $.info
+  update:
+    x-artifacts:
+      authentication: authentication/topograph-authentication.yml
+      conventions: conventions/topograph-conventions.yml
+      errors: errors/topograph-problem-types.yml
+      lifecycle: lifecycle/topograph-lifecycle.yml
+      data_model: data-model/topograph-data-model.yml
+      webhooks: asyncapi/topograph-monitoring-webhooks.yml
+      mcp: mcp/topograph-mcp.yml
+      agentic_access: agentic-access/topograph-agentic-access.yml
+- target: $.servers
+  update:
+    x-apievangelist-base: https://api.topograph.co

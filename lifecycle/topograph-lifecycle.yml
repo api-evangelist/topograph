@@ -1,0 +1,26 @@
+generated: '2026-07-21'
+method: searched
+source: https://docs.topograph.co/changelog + openapi/topograph-openapi-original.json + status.topograph.co
+versioning:
+  scheme: uri-path
+  current: v2
+  legacy: v1
+  docs: https://docs.topograph.co
+  note: Current API surface is /v2/*; some operational endpoints remain under /v1 (e.g. /v1/health).
+deprecation:
+  policy_url: https://docs.topograph.co/changelog
+  sunset_header: false
+  additive_policy: >-
+    Changelog entries describe changes as additive ("no existing field moves"); deprecated
+    operations are marked in the OpenAPI and superseded by v2 equivalents.
+status_page: https://status.topograph.co/
+health_endpoint: https://api.topograph.co/v1/health
+sla:
+  url: https://trust.topograph.co/
+  note: Uptime/SLA commitments not published on a public page; status is exposed via the status page and health endpoint.
+changelog: https://docs.topograph.co/changelog
+deprecated_operations:
+- operation: openapi/topograph-openapi-original.json#CompanyOnboardingController_getOnboarding_v2
+  path: POST /v2/onboarding
+  replacement: 'POST /v2/company with mode: "onboarding"'
+  source: https://docs.topograph.co/api-reference/data/get-onboarding-data-deprecated

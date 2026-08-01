@@ -1,0 +1,12 @@
+generated: '2026-07-21'
+method: derived
+source: openapi/topograph-openapi-original.json
+workflows:
+- file: topograph-resolve-and-retrieve.yml
+  workflowId: resolveAndRetrieveCompany
+  title: Resolve a company and retrieve KYB data
+  summary: Search for a company, request its data and documents, then poll for the result by requestId.
+- file: topograph-monitor-company.yml
+  workflowId: monitorCompanyLifecycle
+  title: Monitor a company for register changes
+  summary: Create a monitor with correlation metadata, list monitors, read its change logs, and stop it.

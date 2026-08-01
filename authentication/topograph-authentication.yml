@@ -1,0 +1,39 @@
+generated: '2026-07-21'
+method: searched
+source: openapi/topograph-openapi-original.json + https://topograph.co/developers/mcp + https://api.topograph.co/.well-known/oauth-authorization-server
+docs: https://docs.topograph.co
+summary:
+  types:
+  - apiKey
+  - oauth2
+  api_key_in:
+  - header
+  oauth2_flows:
+  - authorizationCode
+  - refreshToken
+  note: >-
+    The REST API authenticates with an x-api-key header (workspace key). The designer / MCP surface
+    authenticates with OAuth 2.1 via Clerk (clerk.topograph.co); production API keys are never used
+    by the MCP client.
+schemes:
+- name: x-api-key
+  type: apiKey
+  in: header
+  parameter: x-api-key
+  applies_to: REST API (https://api.topograph.co/v2/*)
+  sources:
+  - openapi/topograph-openapi-original.json
+- name: OAuth2.1
+  type: oauth2
+  applies_to: designer / MCP (https://api.topograph.co/designer-mcp)
+  issuer: https://clerk.topograph.co
+  authorizationUrl: https://clerk.topograph.co/oauth/authorize
+  tokenUrl: https://clerk.topograph.co/oauth/token
+  revocationUrl: https://clerk.topograph.co/oauth/token/revoke
+  jwksUri: https://clerk.topograph.co/.well-known/jwks.json
+  registrationUrl: https://clerk.topograph.co/oauth/register
+  pkce: S256
+  flows: [authorizationCode, refreshToken]
+  scopes_ref: scopes/topograph-scopes.yml
+  sources:
+  - https://api.topograph.co/.well-known/oauth-authorization-server

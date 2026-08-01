@@ -1,0 +1,30 @@
+generated: '2026-07-21'
+method: searched
+source: https://api.topograph.co/.well-known/oauth-authorization-server
+docs: https://topograph.co/developers/mcp
+note: >-
+  The Topograph REST API authenticates with an x-api-key header and declares no OAuth2 scopes.
+  These OAuth 2.1 / OIDC scopes govern the designer / MCP surface, whose authorization server is
+  Clerk (clerk.topograph.co). Captured verbatim from the RFC 8414 metadata.
+schemes:
+- name: OAuth2.1
+  issuer: https://clerk.topograph.co
+  authorizationUrl: https://clerk.topograph.co/oauth/authorize
+  tokenUrl: https://clerk.topograph.co/oauth/token
+  flows: [authorizationCode, refreshToken]
+  pkce: S256
+scopes:
+- scope: openid
+  description: OpenID Connect authentication; issue an ID token.
+- scope: profile
+  description: Access to the user's basic profile claims.
+- scope: email
+  description: Access to the user's email address.
+- scope: public_metadata
+  description: Read the user's public metadata.
+- scope: private_metadata
+  description: Read the user's private metadata.
+- scope: offline_access
+  description: Issue a refresh token for offline access.
+- scope: user:org:read
+  description: Read the user's organization membership.

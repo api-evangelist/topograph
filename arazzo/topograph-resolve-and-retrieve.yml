@@ -1,0 +1,55 @@
+arazzo: 1.0.1
+info:
+  title: Resolve a company and retrieve KYB data
+  version: 1.0.0
+  summary: Search for a company, request its data and documents, then poll for the result.
+sourceDescriptions:
+- name: topograph
+  url: ../openapi/topograph-openapi-original.json
+  type: openapi
+workflows:
+- workflowId: resolveAndRetrieveCompany
+  summary: Search-first resolution, then request company data and poll by requestId.
+  inputs:
+    type: object
+    required: [countryCode, query]
+    properties:
+      countryCode: { type: string, example: FR }
+      query: { type: string, example: Acme SAS }
+      dataPoints: { type: array, items: { type: string }, example: [shareholders, ultimateBeneficialOwners] }
+  steps:
+  - stepId: search
+    operationId: SearchController_searchV2_v2
+    parameters:
+    - name: countryCode
+      in: query
+      value: $inputs.countryCode
+    - name: query
+      in: query
+      value: $inputs.query
+    successCriteria:
+    - condition: $statusCode == 200
+    outputs:
+      companyId: $response.body#/0/id
+  - stepId: requestCompany
+    operationId: CompanyController_getCompany_v2
+    requestBody:
+      contentType: application/json
+      payload:
+        id: $steps.search.outputs.companyId
+        countryCode: $inputs.countryCode
+        dataPoints: $inputs.dataPoints
+    successCriteria:
+    - condition: $statusCode == 200
+    outputs:
+      requestId: $response.body#/requestId
+  - stepId: pollResult
+    operationId: CompanyController_getCompanyRequest_v2
+    parameters:
+    - name: requestId
+      in: path
+      value: $steps.requestCompany.outputs.requestId
+    successCriteria:
+    - condition: $statusCode == 200
+  outputs:
+    requestId: $steps.requestCompany.outputs.requestId

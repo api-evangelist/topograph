@@ -1,0 +1,20 @@
+generated: '2026-07-21'
+method: searched
+source: https://docs.topograph.co/changelog
+scheme: weekly-labeled
+current_label: Week 30, 2026
+policy: additive (entries note "no existing field moves")
+entries:
+- label: Week 30, 2026
+  breaking: false
+  highlights:
+  - 'POST /v2/monitors now accepts an optional metadata object (arbitrary key-value string pairs) echoed back in monitor responses and every monitor.notification webhook.'
+  - 'monitorId in monitor.notification webhooks now matches the id returned by POST /v2/monitors (previously an internal identifier that could not be correlated) — re-key any stored values.'
+  - 'Every document returned by /v2/company now carries a source object identifying the issuing register (e.g. infogreffe), on availableDocuments and downloaded documents across all countries.'
+- label: Week 29, 2026
+  breaking: false
+  highlights:
+  - 'Company history as a document (documents.tradeRegisterHistory) added for Germany (Chronologischer Abdruck) and Ukraine (certified state-register extract), joining NL/IT/FR.'
+  - 'Czech shareholders (společníci) now returned for s.r.o. companies via the shareholders dataPoint.'
+  - 'Hungarian annual accounts now available under financialStatements from the national filing portal.'
+  - 'ultimateBeneficialOwners now resolves for Cyprus, Slovenia and Portugal, each with a ubo_extract certificate document.'

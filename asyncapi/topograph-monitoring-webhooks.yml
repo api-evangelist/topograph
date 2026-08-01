@@ -1,0 +1,36 @@
+generated: '2026-07-21'
+method: searched
+source: https://docs.topograph.co/essentials/monitoring
+spec_type: Webhooks
+summary: >-
+  Topograph delivers real-time change notifications for monitored companies via account-level
+  webhooks. Changes to a monitored company are detected with AI, categorized, and pushed as
+  monitor.notification events to the account's configured webhook endpoint(s).
+configuration:
+  scope: account-level
+  detail: Webhooks are configured per account; all monitors for the account POST to the same endpoint(s).
+  managed_via:
+  - POST /v2/monitors (start monitoring a company)
+  - DELETE /v2/monitors/{id} (stop monitoring)
+  - GET /v2/monitors/{id}/logs (monitor change logs)
+events:
+- type: monitor.notification
+  description: Emitted when a meaningful change is detected on a monitored company.
+  delivery: HTTP POST to the account webhook endpoint
+  payload_fields:
+  - name: type
+    value: monitor.notification
+  - name: monitorId
+    description: Unique monitor identifier; matches the id returned by POST /v2/monitors. Use to order and deduplicate events.
+  - name: companyId
+    description: The monitored company identifier.
+  - name: metadata
+    description: Arbitrary key-value pairs supplied on the monitor, echoed back for correlation (e.g. caseId).
+  - name: monitorHasBeenDeactivated
+    description: Boolean; true when the monitor was deactivated (e.g. company no longer found), signalling a final notification.
+change_categories:
+- id: status
+  description: Legal lifecycle events (bankruptcy, liquidation, dissolution).
+notes:
+- Company requests and monitors both carry a metadata object echoed into notifications for internal record mapping.
+- No AsyncAPI document is published by the provider; this is a captured webhook catalog derived from the monitoring docs.

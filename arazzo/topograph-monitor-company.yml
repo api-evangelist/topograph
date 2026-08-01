@@ -1,0 +1,55 @@
+arazzo: 1.0.1
+info:
+  title: Monitor a company for register changes
+  version: 1.0.0
+  summary: Start monitoring a company, review its change logs, then stop monitoring.
+sourceDescriptions:
+- name: topograph
+  url: ../openapi/topograph-openapi-original.json
+  type: openapi
+workflows:
+- workflowId: monitorCompanyLifecycle
+  summary: Create a monitor, list monitors, read its change logs, and stop it.
+  inputs:
+    type: object
+    required: [companyId, countryCode]
+    properties:
+      companyId: { type: string, example: '932884117' }
+      countryCode: { type: string, example: FR }
+      caseId: { type: string, example: case-12345 }
+  steps:
+  - stepId: createMonitor
+    operationId: MonitoringController_createMonitor_v2
+    requestBody:
+      contentType: application/json
+      payload:
+        companyId: $inputs.companyId
+        countryCode: $inputs.countryCode
+        metadata:
+          caseId: $inputs.caseId
+    successCriteria:
+    - condition: $statusCode == 201
+    outputs:
+      monitorId: $response.body#/id
+  - stepId: listMonitors
+    operationId: MonitoringController_listMonitors_v2
+    successCriteria:
+    - condition: $statusCode == 200
+  - stepId: readLogs
+    operationId: MonitoringController_getMonitorLogs_v2
+    parameters:
+    - name: id
+      in: path
+      value: $steps.createMonitor.outputs.monitorId
+    successCriteria:
+    - condition: $statusCode == 200
+  - stepId: stopMonitor
+    operationId: MonitoringController_stopMonitoring_v2
+    parameters:
+    - name: id
+      in: path
+      value: $steps.createMonitor.outputs.monitorId
+    successCriteria:
+    - condition: $statusCode == 204
+  outputs:
+    monitorId: $steps.createMonitor.outputs.monitorId

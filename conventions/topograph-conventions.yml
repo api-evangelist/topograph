@@ -1,0 +1,77 @@
+generated: '2026-07-21'
+method: searched
+source: https://docs.topograph.co (essentials/retrieve_company, essentials/monitoring, essentials/search, changelog) + openapi/topograph-openapi-original.json
+summary: >-
+  Cross-cutting request/response semantics for the Topograph KYB API. REST over HTTPS at
+  https://api.topograph.co, JSON request/response bodies, API-key auth in a header, cursor
+  pagination on list endpoints, natural-key idempotency via a 24-hour deduplication window,
+  arbitrary metadata echoed through webhooks, and a custom (non-RFC9457) error envelope.
+authentication:
+  style: api-key
+  header: x-api-key
+  docs: https://docs.topograph.co
+  note: >-
+    All REST calls authenticate with a workspace API key sent in the x-api-key header. The MCP /
+    designer surface uses OAuth 2.1 (Clerk) instead; see mcp/topograph-mcp.yml and
+    authentication/topograph-authentication.yml.
+idempotency:
+  supported: true
+  mechanism: natural-key
+  detail: >-
+    Topograph has no client-supplied Idempotency-Key header. Instead it is idempotent by natural key:
+    (1) a 24-hour deduplication window prevents duplicate billing for the same data block, company,
+    and account, so repeating a POST /v2/company within that window returns the cached result and is
+    not re-billed; (2) fetching a prior result by requestId (GET /v2/company/{requestId}) is always
+    free and non-billable; (3) re-calling POST /v2/monitors for a company already monitored replaces
+    the stored configuration/metadata rather than creating a duplicate monitor.
+  dedup_window: 24h
+  dedup_key: [data_block, company, account]
+  free_replay: GET /v2/company/{requestId}
+  source: https://docs.topograph.co/essentials/retrieve_company
+pagination:
+  style: cursor
+  params:
+    cursor: after
+    limit: limit
+  applies_to:
+  - GET /v2/monitors
+  - GET /v2/monitors/{id}/logs
+  - GET /v2/billing/notifications/recent
+  source: openapi/topograph-openapi-original.json
+metadata:
+  supported: true
+  detail: >-
+    POST /v2/company and POST /v2/monitors accept an optional metadata object of arbitrary
+    key-value string pairs, stored on the request/monitor and echoed back in responses and in every
+    monitor.notification webhook. Limits: max 50 keys, keys up to 40 chars (longer keys skipped),
+    values up to 500 chars (longer values truncated).
+  source: https://docs.topograph.co/essentials/monitoring
+async_pattern:
+  detail: >-
+    Company data retrieval is request/poll: POST /v2/company returns a requestId; poll
+    GET /v2/company/{requestId} for progressive delivery of documents and additional datapoints.
+    Change monitoring is push: account-level webhooks deliver monitor.notification events.
+  source: https://docs.topograph.co/essentials/retrieve_company
+versioning:
+  scheme: uri-path
+  current: v2
+  legacy: v1
+  detail: >-
+    The current surface is /v2/*. Some operational endpoints remain under /v1 (e.g. /v1/health).
+    See lifecycle/topograph-lifecycle.yml.
+error_envelope:
+  format: custom
+  rfc9457: false
+  shape: '{ statusCode: number, error: { code: string, message: string } }'
+  example_codes: [invalid_request]
+  source: openapi/topograph-openapi-original.json
+  note: See errors/topograph-problem-types.yml for the derived catalog.
+rate_limiting:
+  documented: false
+  note: No rate-limit headers or published quota were found in the OpenAPI or docs; billing is
+    consumption-based (per data block / document) rather than request-rate limited.
+cross_reference:
+  errors: errors/topograph-problem-types.yml
+  lifecycle: lifecycle/topograph-lifecycle.yml
+  authentication: authentication/topograph-authentication.yml
+  webhooks: asyncapi/topograph-monitoring-webhooks.yml

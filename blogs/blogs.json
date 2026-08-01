@@ -1,0 +1,28 @@
+{
+  "repo": "topograph",
+  "feeds": [
+    {
+      "source": "https://docs.topograph.co/quickstart",
+      "feed_url": "https://docs.topograph.co/quickstart",
+      "title": "",
+      "saved": 0,
+      "method": "none"
+    },
+    {
+      "source": "https://www.topograph.co/blog/feed.xml",
+      "feed_url": "https://www.topograph.co/blog/feed.xml",
+      "title": "",
+      "saved": 0,
+      "method": "feed"
+    },
+    {
+      "source": "https://topograph.co/blog",
+      "feed_url": "https://www.topograph.co/blog/feed.xml",
+      "title": "",
+      "saved": 0,
+      "method": "discovered"
+    }
+  ],
+  "post_count": 14,
+  "fetched": "2026-08-01T15:49:00Z"
+}

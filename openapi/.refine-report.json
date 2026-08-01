@@ -1,0 +1,26 @@
+{
+  "provider": "topograph",
+  "sources": [
+    "topograph-billing-api-openapi.yml",
+    "topograph-billing-notifications-api-openapi.yml",
+    "topograph-data-api-openapi.yml",
+    "topograph-monitors-api-openapi.yml",
+    "topograph-pricing-api-openapi.yml",
+    "topograph-search-api-openapi.yml",
+    "topograph-workspaces-api-openapi.yml"
+  ],
+  "outputs": [
+    "topograph-billing-api-openapi.yml",
+    "topograph-billing-notifications-api-openapi.yml",
+    "topograph-data-api-openapi.yml",
+    "topograph-monitors-api-openapi.yml",
+    "topograph-pricing-api-openapi.yml",
+    "topograph-search-api-openapi.yml",
+    "topograph-workspaces-api-openapi.yml"
+  ],
+  "archived": [],
+  "errors": [],
+  "warnings": [],
+  "notes": [],
+  "skipped": []
+}

@@ -1,0 +1,107 @@
+generated: '2026-07-21'
+method: derived
+source: openapi/topograph-openapi-original.json
+summary: >-
+  Entity-relationship graph derived from the Topograph OpenAPI component schemas (137 total). The
+  core entity is the Company, enriched from official registers with ownership (shareholders, UBOs,
+  subsidiaries), governance (legal representatives / roles), status and compliance flags, and
+  country-specific identifiers. Requests are made against a Company and tracked by requestId;
+  Monitors watch a Company for change events.
+entities:
+- name: Company
+  schema: CompanyDTO
+  key: id
+  identity_fields: [id, countryCode, identifiers, taxId, legalName]
+  domains: [company data, KYB]
+- name: SearchResult
+  schema: SearchResult
+  key: id
+  note: Lightweight result of GET /v2/search; its id resolves a company for /v2/company requests.
+- name: CompanyRequest
+  schema: CreateCompanyRequestDTO / GetCompanyRequestResultDTO
+  key: requestId
+  note: A billable data-retrieval request for a company; polled by requestId.
+- name: Shareholder
+  schema: ShareholderDTO
+  key: entityId
+- name: UltimateBeneficialOwner
+  schema: UltimateBeneficialOwnerDTO
+  key: entityId
+- name: Subsidiary
+  schema: SubsidiaryDTO
+  key: entityId
+- name: LegalRepresentative
+  schema: LegalRepresentativeDTO
+  key: entityId
+- name: Monitor
+  schema: MonitorDto
+  key: id
+- name: Address
+  schema: AddressDTO
+- name: Role
+  schema: RoleDTO
+relationships:
+- from: CompanyRequest
+  to: Company
+  type: has_one
+  via: id
+- from: SearchResult
+  to: Company
+  type: belongs_to
+  via: id
+- from: Company
+  to: CountryIdentifiers
+  type: has_one
+  via: identifiers
+- from: Company
+  to: Address
+  type: has_one
+  via: legalAddress
+- from: Company
+  to: CompanyStatus
+  type: has_one
+  via: status
+- from: Company
+  to: ComplianceFlags
+  type: has_one
+  via: complianceFlags
+- from: Company
+  to: Shareholder
+  type: has_many
+  via: shareholders (dataPoint)
+- from: Company
+  to: UltimateBeneficialOwner
+  type: has_many
+  via: ultimateBeneficialOwners (dataPoint)
+- from: Company
+  to: Subsidiary
+  type: has_many
+  via: subsidiaries (dataPoint)
+- from: Company
+  to: LegalRepresentative
+  type: has_many
+  via: legalRepresentatives (dataPoint)
+- from: Shareholder
+  to: Company
+  type: belongs_to
+  via: company
+  note: A shareholder that is itself a company references CompanyDTO (enables multi-level ownership graph traversal).
+- from: Subsidiary
+  to: Company
+  type: belongs_to
+  via: company
+- from: LegalRepresentative
+  to: Role
+  type: has_one
+  via: role
+- from: UltimateBeneficialOwner
+  to: Control
+  type: has_one
+  via: control
+- from: Monitor
+  to: Company
+  type: belongs_to
+  via: companyId
+notes:
+- Ownership is recursive - Shareholder.company and Subsidiary.company both point back to CompanyDTO, forming the multi-level ownership graph Topograph traverses across borders.
+- Country-specific identifier schemas (FranceIdentifiers, ItalyIdentifiers, GermanyIdentifiers, ... 30+) specialize CountryIdentifiersDTO per jurisdiction.

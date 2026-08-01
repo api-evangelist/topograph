@@ -1,0 +1,35 @@
+generated: '2026-07-21'
+method: searched
+probe: true
+source: https://trust.topograph.co/
+url: https://trust.topograph.co/
+platform: bastion
+stats:
+  controls: 174
+  documents: 9
+  subprocessors: 1
+certifications:
+- ISO 27001:2022
+- SOC 2 Type 2
+- Penetration test certification
+compliance:
+- GDPR
+compliance_documents:
+- Pentest certification
+- ISO 27001:2022
+- SOC 2 Type 2 report
+control_domains:
+- Business Operations
+- Cloud Security
+- Human Resources
+- Data (encryption at rest, in transit, file store)
+- Access Control
+- Change Management
+evidence:
+- source: https://trust.topograph.co/
+  keywords:
+  - iso 27001
+  - soc 2 type 2
+  - pentest
+  - gdpr
+  - trust center
