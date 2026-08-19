@@ -1,0 +1,309 @@
+{
+  "item": [
+    {
+      "id": "495c9031-83b1-4996-ba9a-3947bf8c2b99",
+      "name": "Search",
+      "description": {
+        "content": "",
+        "type": "text/plain"
+      },
+      "item": [
+        {
+          "id": "84167b6d-bd11-4393-b246-370d9be08f53",
+          "name": "Search for companies",
+          "request": {
+            "name": "Search for companies",
+            "description": {
+              "content": "This endpoint allows you to search for companies based on a country code and a query string.\n\nThe search can be performed using either a company legal name, commercial name, historical name, or registration number. Capabilities vary by country.\n\n**Standard Mode (stream=false or omitted):**\nReturns JSON array of results once all search sources have completed.\n\n**Streaming Mode (stream=true):**\nReturns Server-Sent Events (SSE) with progressive results as each search source completes. The endpoint emits named events:\n- `progress`: Partial results from completed sources\n- `complete`: Final results when all sources finish\n- `error`: If the search fails\n\nStreaming is beneficial for countries with multiple search sources (e.g., Germany queries both Unternehmensregister and Handelsregister), providing faster time-to-first-result.\n\nResponse times vary by country: from sub-second to up to 10 seconds.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "v2",
+                "search"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [
+                {
+                  "disabled": false,
+                  "key": "country",
+                  "value": "<string>",
+                  "description": "(Required) The country code in ISO 3166-1 alpha-2 format (e.g., \"FR\" for France, \"DE\" for Germany)."
+                },
+                {
+                  "disabled": false,
+                  "key": "query",
+                  "value": "<string>",
+                  "description": "(Required) The search query, which can be a company name or registration number. Note that search capabilities may vary by country, with some supporting only name or registration number searches."
+                },
+                {
+                  "disabled": false,
+                  "key": "stream",
+                  "value": "<boolean>",
+                  "description": "Enable streaming mode. When true, returns Server-Sent Events (SSE) with progressive results as each search source completes. Set Accept header to \"text/event-stream\" for proper streaming. When false or omitted, returns standard JSON array after all sources complete."
+                },
+                {
+                  "disabled": false,
+                  "key": "transliterate",
+                  "value": "<boolean>",
+                  "description": "When true, user-facing string fields in the response (company names, addresses, person names, activity descriptions) are romanized from their native script to Latin characters on the way out. Internal data, cache, and billing are unaffected — only the response payload is transformed. Routing: Cyrillic/Greek/Hangul/Hebrew/Arabic/Thai via unidecode, Chinese via pinyin-pro (toneless), Japanese via kuroshiro (Hepburn)."
+                }
+              ],
+              "variable": []
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "GET",
+            "auth": {
+              "type": "apikey",
+              "apikey": [
+                {
+                  "key": "key",
+                  "value": "x-api-key"
+                },
+                {
+                  "key": "value",
+                  "value": "{{apiKey}}"
+                },
+                {
+                  "key": "in",
+                  "value": "header"
+                }
+              ]
+            }
+          },
+          "response": [
+            {
+              "id": "b44e89b5-437f-452d-9ffc-fbdcf543fc9e",
+              "name": "List of companies (JSON when stream=false, SSE when stream=true)",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v2",
+                    "search"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "country",
+                      "value": "FR"
+                    },
+                    {
+                      "key": "query",
+                      "value": "Topograph"
+                    },
+                    {
+                      "key": "stream",
+                      "value": "true"
+                    },
+                    {
+                      "key": "transliterate",
+                      "value": "false"
+                    }
+                  ],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "[\n  {\n    \"address\": {\n      \"addressLine1\": \"10 rue de la Fraternité\",\n      \"addressLine2\": \"Topograph Building\",\n      \"city\": \"Bagnolet\",\n      \"postalCode\": \"93170\",\n      \"region\": \"FR\",\n      \"countryCode\": \"FR\",\n      \"poBox\": \"PO Box 123\",\n      \"careOf\": \"c/o John Doe\",\n      \"state\": \"Île-de-France\",\n      \"latitude\": 59.9139,\n      \"longitude\": 10.7522\n    },\n    \"id\": \"932884117\",\n    \"legalName\": \"SEMAPHORE\",\n    \"countryCode\": \"FR\",\n    \"matchReason\": {\n      \"matchType\": \"default\"\n    },\n    \"legalNameInEnglish\": \"Test Display Hong Kong Trading Limited\",\n    \"companyNameTransliterations\": [\n      \"Naftogaz\",\n      \"Naftohaz\"\n    ]\n  },\n  {\n    \"address\": {\n      \"addressLine1\": \"10 rue de la Fraternité\",\n      \"addressLine2\": \"Topograph Building\",\n      \"city\": \"Bagnolet\",\n      \"postalCode\": \"93170\",\n      \"region\": \"FR\",\n      \"countryCode\": \"FR\",\n      \"poBox\": \"PO Box 123\",\n      \"careOf\": \"c/o John Doe\",\n      \"state\": \"Île-de-France\",\n      \"latitude\": 59.9139,\n      \"longitude\": 10.7522\n    },\n    \"id\": \"932884117\",\n    \"legalName\": \"SEMAPHORE\",\n    \"countryCode\": \"FR\",\n    \"matchReason\": {\n      \"matchType\": \"default\"\n    },\n    \"legalNameInEnglish\": \"Test Display Hong Kong Trading Limited\",\n    \"companyNameTransliterations\": [\n      \"Naftogaz\",\n      \"Naftohaz\"\n    ]\n  }\n]",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "37225b39-6416-498d-ab18-c4b0ee4c8a93",
+              "name": "Bad Request - Invalid search query",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v2",
+                    "search"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "country",
+                      "value": "FR"
+                    },
+                    {
+                      "key": "query",
+                      "value": "Topograph"
+                    },
+                    {
+                      "key": "stream",
+                      "value": "true"
+                    },
+                    {
+                      "key": "transliterate",
+                      "value": "false"
+                    }
+                  ],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"statusCode\": 400,\n  \"error\": {\n    \"code\": \"invalid_request\",\n    \"message\": \"Query is too short. Please provide at least 2 characters for company name search\",\n    \"details\": [\n      \"Query must be at least 2 characters\"\n    ]\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "a8afac6c-92ad-4313-9a24-7b298a67f6b5",
+              "name": "Internal Server Error - Search failed",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v2",
+                    "search"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "country",
+                      "value": "FR"
+                    },
+                    {
+                      "key": "query",
+                      "value": "Topograph"
+                    },
+                    {
+                      "key": "stream",
+                      "value": "true"
+                    },
+                    {
+                      "key": "transliterate",
+                      "value": "false"
+                    }
+                  ],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Internal Server Error",
+              "code": 500,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"statusCode\": 500,\n  \"error\": {\n    \"code\": \"service_unavailable\",\n    \"message\": \"An error occurred while searching. Please try again later.\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        }
+      ],
+      "event": []
+    }
+  ],
+  "event": [],
+  "variable": [
+    {
+      "type": "string",
+      "value": "https://api.topograph.co",
+      "key": "baseUrl"
+    }
+  ],
+  "auth": {
+    "type": "apikey",
+    "apikey": [
+      {
+        "key": "key",
+        "value": "x-api-key"
+      },
+      {
+        "key": "value",
+        "value": "{{apiKey}}"
+      },
+      {
+        "key": "in",
+        "value": "header"
+      }
+    ]
+  },
+  "info": {
+    "_postman_id": "8af97f39-70d6-45e5-b74c-271746d7c4c7",
+    "name": "Topograph Billing Search API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": {
+      "content": "The Topograph API",
+      "type": "text/plain"
+    }
+  }
+}

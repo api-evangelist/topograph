@@ -1,0 +1,115 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "Topograph Billing Data API",
+    "version": "0.1"
+  },
+  "request": {
+    "auth": {
+      "type": "apikey",
+      "key": "x-api-key",
+      "value": "{{x-api-key}}",
+      "placement": "header"
+    }
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Data",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Get Company Data and Documents",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api.topograph.co/v2/company",
+            "params": [
+              {
+                "name": "transliterate",
+                "value": "",
+                "type": "query",
+                "description": "If true, transliterates non-Latin strings in the response to Latin script."
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "apikey",
+              "key": "x-api-key",
+              "value": "{{x-api-key}}",
+              "placement": "header"
+            }
+          },
+          "docs": "Retrieve company data and documents for a specific company.\n\nYou can either:\n1. Create a new request by providing countryCode, id, dataPoints, optional mode, and optional document IDs.\n2. Re-fetch a previous request by providing requestId (returns cached data and is not billed again).\n\nAvailable datapoints include:\n- company: core company information\n- legalRepresentatives: directors, managers, and signing officers\n- otherKeyPersons: auditors, board members, and similar roles when available\n- es"
+        },
+        {
+          "info": {
+            "name": "Get Company Request Result",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.topograph.co/v2/company/:requestId",
+            "params": [
+              {
+                "name": "requestId",
+                "value": "",
+                "type": "path",
+                "description": "The request ID returned by the initial POST /v2/company call"
+              },
+              {
+                "name": "transliterate",
+                "value": "",
+                "type": "query",
+                "description": "If true, transliterates non-Latin strings in the response to Latin script."
+              }
+            ],
+            "auth": {
+              "type": "apikey",
+              "key": "x-api-key",
+              "value": "{{x-api-key}}",
+              "placement": "header"
+            }
+          },
+          "docs": "Retrieve the result of a previous company data request by its ID. Returns the latest available data including all subrequests (documents, additional datapoints).\n\nThis endpoint is free and will not be billed again. Use it to poll for results after creating a request via POST /v2/company."
+        },
+        {
+          "info": {
+            "name": "Get Onboarding Data (Deprecated)",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api.topograph.co/v2/onboarding",
+            "params": [
+              {
+                "name": "transliterate",
+                "value": "",
+                "type": "query",
+                "description": "If true, transliterates non-Latin strings in the response to Latin script."
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "apikey",
+              "key": "x-api-key",
+              "value": "{{x-api-key}}",
+              "placement": "header"
+            }
+          },
+          "docs": "Deprecated: Use POST /v2/company with mode: \"onboarding\" instead.\n\nThis endpoint is internally routed as a companyProfile request with mode: \"onboarding\" and a 50-cent budget cap."
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

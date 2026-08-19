@@ -1,0 +1,177 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "Topograph Billing Monitors API",
+    "version": "0.1"
+  },
+  "request": {
+    "auth": {
+      "type": "apikey",
+      "key": "x-api-key",
+      "value": "{{x-api-key}}",
+      "placement": "header"
+    }
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Monitors",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "List monitored companies",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.topograph.co/v2/monitors",
+            "params": [
+              {
+                "name": "companyId",
+                "value": "",
+                "type": "query",
+                "description": "Filter by company ID"
+              },
+              {
+                "name": "countryCode",
+                "value": "",
+                "type": "query",
+                "description": "Filter by country code (ISO 2-letter)"
+              },
+              {
+                "name": "after",
+                "value": "",
+                "type": "query",
+                "description": "Cursor for pagination"
+              },
+              {
+                "name": "first",
+                "value": "",
+                "type": "query",
+                "description": "Number of items to fetch (default: 50)"
+              }
+            ],
+            "auth": {
+              "type": "apikey",
+              "key": "x-api-key",
+              "value": "{{x-api-key}}",
+              "placement": "header"
+            }
+          },
+          "docs": "List monitored companies"
+        },
+        {
+          "info": {
+            "name": "Add monitoring for a company",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api.topograph.co/v2/monitors",
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "apikey",
+              "key": "x-api-key",
+              "value": "{{x-api-key}}",
+              "placement": "header"
+            }
+          },
+          "docs": "Add monitoring for a company"
+        },
+        {
+          "info": {
+            "name": "Get monitor details",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.topograph.co/v2/monitors/:id",
+            "params": [
+              {
+                "name": "id",
+                "value": "",
+                "type": "path",
+                "description": "Monitor ID"
+              }
+            ],
+            "auth": {
+              "type": "apikey",
+              "key": "x-api-key",
+              "value": "{{x-api-key}}",
+              "placement": "header"
+            }
+          },
+          "docs": "Get monitor details"
+        },
+        {
+          "info": {
+            "name": "Stop monitoring a company",
+            "type": "http"
+          },
+          "http": {
+            "method": "DELETE",
+            "url": "https://api.topograph.co/v2/monitors/:id",
+            "params": [
+              {
+                "name": "id",
+                "value": "",
+                "type": "path",
+                "description": "Monitor ID to stop"
+              }
+            ],
+            "auth": {
+              "type": "apikey",
+              "key": "x-api-key",
+              "value": "{{x-api-key}}",
+              "placement": "header"
+            }
+          },
+          "docs": "Stop monitoring a company"
+        },
+        {
+          "info": {
+            "name": "Get monitor change logs",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.topograph.co/v2/monitors/:id/logs",
+            "params": [
+              {
+                "name": "id",
+                "value": "",
+                "type": "path",
+                "description": "Monitor ID"
+              },
+              {
+                "name": "first",
+                "value": "",
+                "type": "query",
+                "description": "Number of items to fetch (default: 25)"
+              },
+              {
+                "name": "after",
+                "value": "",
+                "type": "query",
+                "description": "Cursor for pagination"
+              }
+            ],
+            "auth": {
+              "type": "apikey",
+              "key": "x-api-key",
+              "value": "{{x-api-key}}",
+              "placement": "header"
+            }
+          },
+          "docs": "Get monitor change logs"
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

@@ -1,0 +1,69 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "Topograph Billing Search API",
+    "version": "0.1"
+  },
+  "request": {
+    "auth": {
+      "type": "apikey",
+      "key": "x-api-key",
+      "value": "{{x-api-key}}",
+      "placement": "header"
+    }
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Search",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Search for companies",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.topograph.co/v2/search",
+            "params": [
+              {
+                "name": "country",
+                "value": "",
+                "type": "query",
+                "description": "The country code in ISO 3166-1 alpha-2 format (e.g., \"FR\" for France, \"DE\" for Germany)."
+              },
+              {
+                "name": "query",
+                "value": "",
+                "type": "query",
+                "description": "The search query, which can be a company name or registration number. Note that search capabilities may vary by country, with some supporting only name or registration number searches."
+              },
+              {
+                "name": "stream",
+                "value": "",
+                "type": "query",
+                "description": "Enable streaming mode. When true, returns Server-Sent Events (SSE) with progressive results as each search source completes. Set Accept header to \"text/event-stream\" for proper streaming. When false or omitted, returns standard JSON array after all sources complete."
+              },
+              {
+                "name": "transliterate",
+                "value": "",
+                "type": "query",
+                "description": "When true, user-facing string fields in the response (company names, addresses, person names, activity descriptions) are romanized from their native script to Latin characters on the way out. Internal data, cache, and billing are unaffected — only the response payload is transformed. Routing: Cyrillic/Greek/Hangul/Hebrew/Arabic/Thai via unidecode, Chinese via pinyin-pro (toneless), Japanese via kuroshiro (Hepburn)."
+              }
+            ],
+            "auth": {
+              "type": "apikey",
+              "key": "x-api-key",
+              "value": "{{x-api-key}}",
+              "placement": "header"
+            }
+          },
+          "docs": "This endpoint allows you to search for companies based on a country code and a query string.\n\nThe search can be performed using either a company legal name, commercial name, historical name, or registration number. Capabilities vary by country.\n\n**Standard Mode (stream=false or omitted):**\nReturns JSON array of results once all search sources have completed.\n\n**Streaming Mode (stream=true):**\nReturns Server-Sent Events (SSE) with progressive results as each search source completes. The endpoint "
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

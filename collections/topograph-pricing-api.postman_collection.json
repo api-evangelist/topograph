@@ -1,0 +1,157 @@
+{
+  "item": [
+    {
+      "id": "7853cd10-8998-4a99-b527-1b0143f38cd8",
+      "name": "Pricing",
+      "description": {
+        "content": "",
+        "type": "text/plain"
+      },
+      "item": [
+        {
+          "id": "e97b2d4d-22b6-42b5-8f92-5713e9ed30b1",
+          "name": "Get pricing for a country",
+          "request": {
+            "name": "Get pricing for a country",
+            "description": {
+              "content": "Returns pricing for a specific country.\n\nThe response includes:\n- blocks: SKUs, datapoint coverage, verification and onboarding mode prices (with an authoritative hint), and optional includedDocuments\n- Flat fields: per-datapoint availability and prices (legacy companyProfile included)\n- Company search and availableDocuments listing are free\n\nPrices are in credits (account balance units). Rates may vary by subscription plan.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "v2",
+                "pricing"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [
+                {
+                  "disabled": false,
+                  "key": "countryCode",
+                  "value": "<string>",
+                  "description": "(Required) The country code in ISO 3166-1 alpha-2 format (e.g., \"FR\" for France, \"DE\" for Germany)."
+                }
+              ],
+              "variable": []
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "GET",
+            "auth": {
+              "type": "apikey",
+              "apikey": [
+                {
+                  "key": "key",
+                  "value": "x-api-key"
+                },
+                {
+                  "key": "value",
+                  "value": "{{apiKey}}"
+                },
+                {
+                  "key": "in",
+                  "value": "header"
+                }
+              ]
+            }
+          },
+          "response": [
+            {
+              "id": "9a16bcd8-c652-4467-963f-79e3356a72a9",
+              "name": "Pricing information retrieved successfully",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v2",
+                    "pricing"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "countryCode",
+                      "value": "FR"
+                    }
+                  ],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"blocks\": [\n    {\n      \"sku\": \"ita-company-data\",\n      \"datapoints\": [\n        \"company\",\n        \"legalRepresentatives\"\n      ],\n      \"modes\": {},\n      \"includedDocuments\": [\n        \"trade_register_extract\"\n      ]\n    },\n    {\n      \"sku\": \"ita-company-data\",\n      \"datapoints\": [\n        \"company\",\n        \"legalRepresentatives\"\n      ],\n      \"modes\": {},\n      \"includedDocuments\": [\n        \"trade_register_extract\"\n      ]\n    }\n  ],\n  \"companyProfile\": {\n    \"available\": true,\n    \"price\": 1.5,\n    \"pricingMode\": \"variable\"\n  },\n  \"ultimateBeneficialOwners\": {\n    \"available\": true,\n    \"price\": 1.5,\n    \"pricingMode\": \"variable\"\n  },\n  \"availableDocuments\": {\n    \"available\": true,\n    \"price\": 1.5,\n    \"pricingMode\": \"variable\"\n  },\n  \"company\": {\n    \"available\": true,\n    \"price\": 1.5,\n    \"pricingMode\": \"variable\"\n  },\n  \"legalRepresentatives\": {\n    \"available\": true,\n    \"price\": 1.5,\n    \"pricingMode\": \"variable\"\n  },\n  \"otherKeyPersons\": {\n    \"available\": true,\n    \"price\": 1.5,\n    \"pricingMode\": \"variable\"\n  },\n  \"establishments\": {\n    \"available\": true,\n    \"price\": 1.5,\n    \"pricingMode\": \"variable\"\n  },\n  \"shareholders\": {\n    \"available\": true,\n    \"price\": 1.5,\n    \"pricingMode\": \"variable\"\n  },\n  \"subsidiaries\": {\n    \"available\": true,\n    \"price\": 1.5,\n    \"pricingMode\": \"variable\"\n  },\n  \"graph\": {\n    \"available\": true,\n    \"price\": 1.5,\n    \"pricingMode\": \"variable\"\n  },\n  \"monitoring\": {}\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        }
+      ],
+      "event": []
+    }
+  ],
+  "event": [],
+  "variable": [
+    {
+      "type": "string",
+      "value": "https://api.topograph.co",
+      "key": "baseUrl"
+    }
+  ],
+  "auth": {
+    "type": "apikey",
+    "apikey": [
+      {
+        "key": "key",
+        "value": "x-api-key"
+      },
+      {
+        "key": "value",
+        "value": "{{apiKey}}"
+      },
+      {
+        "key": "in",
+        "value": "header"
+      }
+    ]
+  },
+  "info": {
+    "_postman_id": "c503a40a-455e-4648-9c01-0b0d8bb3f3a8",
+    "name": "Topograph Billing Pricing API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": {
+      "content": "The Topograph API",
+      "type": "text/plain"
+    }
+  }
+}

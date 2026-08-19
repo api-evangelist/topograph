@@ -1,0 +1,146 @@
+{
+  "item": [
+    {
+      "id": "56febe46-518b-48e8-b1bb-0de23c361fa8",
+      "name": "Billing",
+      "description": {
+        "content": "",
+        "type": "text/plain"
+      },
+      "item": [
+        {
+          "id": "7460d673-1ff8-414f-be35-2401f95d5f7f",
+          "name": "Get the current account credit balance",
+          "request": {
+            "name": "Get the current account credit balance",
+            "description": {
+              "content": "Returns the account's remaining credit balance, a derived health status, the auto-topup posture, and the configured low-balance thresholds. This is the remaining balance — for consumption use GET /v2/workspaces/usage.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "v2",
+                "billing",
+                "balance"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "GET",
+            "auth": {
+              "type": "apikey",
+              "apikey": [
+                {
+                  "key": "key",
+                  "value": "x-api-key"
+                },
+                {
+                  "key": "value",
+                  "value": "{{apiKey}}"
+                },
+                {
+                  "key": "in",
+                  "value": "header"
+                }
+              ]
+            }
+          },
+          "response": [
+            {
+              "id": "9c04cbd1-a44c-4ad5-bb3a-29f226f8f812",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v2",
+                    "billing",
+                    "balance"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"balanceInCreditCents\": 42350,\n  \"status\": \"ok\",\n  \"autoTopup\": {\n    \"enabled\": true,\n    \"thresholdInCreditCents\": 5000,\n    \"amountInCreditCents\": 10000\n  },\n  \"lowBalanceThresholds\": [\n    {\n      \"tier\": \"warning\",\n      \"cents\": 100000\n    },\n    {\n      \"tier\": \"warning\",\n      \"cents\": 100000\n    }\n  ]\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        }
+      ],
+      "event": []
+    }
+  ],
+  "event": [],
+  "variable": [
+    {
+      "type": "string",
+      "value": "https://api.topograph.co",
+      "key": "baseUrl"
+    }
+  ],
+  "auth": {
+    "type": "apikey",
+    "apikey": [
+      {
+        "key": "key",
+        "value": "x-api-key"
+      },
+      {
+        "key": "value",
+        "value": "{{apiKey}}"
+      },
+      {
+        "key": "in",
+        "value": "header"
+      }
+    ]
+  },
+  "info": {
+    "_postman_id": "d36efcd2-0787-4593-a13d-02f5badc6dd0",
+    "name": "Topograph Billing API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": {
+      "content": "The Topograph API",
+      "type": "text/plain"
+    }
+  }
+}

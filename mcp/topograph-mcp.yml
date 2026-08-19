@@ -7,21 +7,26 @@ server:
   transport: http
   url: https://api.topograph.co/designer-mcp
   auth: OAuth 2.1 (Clerk-hosted sign-in at clerk.topograph.co); any Clerk user may browse, no invite required
-  note: >-
-    Login (OAuth) is required for the MCP server; no production API key is needed to browse.
-    The production x-api-key is used only by the application when it calls the Topograph REST API.
+  note: Login (OAuth) is required for the MCP server; no production API key is needed to browse. The production
+    x-api-key is used only by the application when it calls the Topograph REST API.
 distribution:
   plugin_marketplace: getsemaphore/topograph-mcp-library
   plugin_install: topograph@topograph
   repo: https://github.com/getsemaphore/topograph-mcp-library
   install_docs: https://topograph.co/developers/mcp
 capabilities:
-  description: >-
-    The Topograph MCP gives coding agents access to the Topograph catalog, docs, and OpenAPI spec so
-    they can integrate without guessing coverage, pricing, or endpoint shapes.
+  description: The Topograph MCP gives coding agents access to the Topograph catalog, docs, and OpenAPI
+    spec so they can integrate without guessing coverage, pricing, or endpoint shapes.
   reads:
   - Live country coverage and available datapoints
   - Pricing and quote estimation for integration planning
   - Searchable documentation and OpenAPI endpoint definitions
   - Rules for onboarding, verification, documents, and search-first company resolution
   - Saved simulator quotes
+deployment:
+  mode: remote
+  endpoint: https://api.topograph.co/designer-mcp
+  verified: probed
+  probe: gated
+  checked: '2026-08-12'
+  source: catalog MCP census

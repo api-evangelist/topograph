@@ -1,0 +1,739 @@
+{
+  "item": [
+    {
+      "id": "18686502-60ae-4486-9b58-cd9fe570e90e",
+      "name": "Billing Notifications",
+      "description": {
+        "content": "",
+        "type": "text/plain"
+      },
+      "item": [
+        {
+          "id": "507d87b3-0fb6-48cf-9509-b64756b3fb83",
+          "name": "Get resolved billing notification config (defaults merged)",
+          "request": {
+            "name": "Get resolved billing notification config (defaults merged)",
+            "description": {},
+            "url": {
+              "path": [
+                "v2",
+                "billing",
+                "notifications",
+                "config"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "GET",
+            "auth": {
+              "type": "apikey",
+              "apikey": [
+                {
+                  "key": "key",
+                  "value": "x-api-key"
+                },
+                {
+                  "key": "value",
+                  "value": "{{apiKey}}"
+                },
+                {
+                  "key": "in",
+                  "value": "header"
+                }
+              ]
+            }
+          },
+          "response": [
+            {
+              "id": "f682b9cb-4e50-4063-8fb2-53d38830ab35",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v2",
+                    "billing",
+                    "notifications",
+                    "config"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"lowBalanceEnabled\": false,\n  \"lowBalanceEmailEnabled\": true,\n  \"lowBalanceWebhookEnabled\": true,\n  \"lowBalanceTiers\": [\n    {\n      \"tier\": \"warning\",\n      \"cents\": 100000\n    },\n    {\n      \"tier\": \"warning\",\n      \"cents\": 100000\n    }\n  ],\n  \"globalHighUsageEnabled\": false,\n  \"globalHighUsageEmailEnabled\": true,\n  \"globalHighUsageWebhookEnabled\": true,\n  \"globalHighUsagePeriodMinutes\": 1440,\n  \"globalHighUsageTiers\": [\n    {\n      \"tier\": \"warning\",\n      \"cents\": 100000\n    },\n    {\n      \"tier\": \"warning\",\n      \"cents\": 100000\n    }\n  ],\n  \"highUsageEnabled\": false,\n  \"highUsageEmailEnabled\": true,\n  \"highUsageWebhookEnabled\": true,\n  \"highUsagePeriodMinutes\": 1440,\n  \"highUsageTiers\": [\n    {\n      \"tier\": \"warning\",\n      \"cents\": 100000\n    },\n    {\n      \"tier\": \"warning\",\n      \"cents\": 100000\n    }\n  ],\n  \"autoTopupNotificationsEnabled\": false,\n  \"autoTopupEmailEnabled\": true,\n  \"autoTopupWebhookEnabled\": true\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "ecc2f7ed-0dc7-49fc-8550-4375e5e48eab",
+          "name": "Upsert billing notification config",
+          "request": {
+            "name": "Upsert billing notification config",
+            "description": {},
+            "url": {
+              "path": [
+                "v2",
+                "billing",
+                "notifications",
+                "config"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "PATCH",
+            "auth": {
+              "type": "apikey",
+              "apikey": [
+                {
+                  "key": "key",
+                  "value": "x-api-key"
+                },
+                {
+                  "key": "value",
+                  "value": "{{apiKey}}"
+                },
+                {
+                  "key": "in",
+                  "value": "header"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"lowBalanceEnabled\": \"<boolean>\",\n  \"lowBalanceEmailEnabled\": \"<boolean>\",\n  \"lowBalanceWebhookEnabled\": \"<boolean>\",\n  \"lowBalanceTiers\": [\n    {\n      \"tier\": \"<string>\",\n      \"cents\": \"<number>\"\n    }\n  ],\n  \"globalHighUsageEnabled\": \"<boolean>\",\n  \"globalHighUsageEmailEnabled\": \"<boolean>\",\n  \"globalHighUsageWebhookEnabled\": \"<boolean>\",\n  \"globalHighUsagePeriodMinutes\": \"<number>\",\n  \"globalHighUsageTiers\": [\n    {\n      \"tier\": \"<string>\",\n      \"cents\": \"<number>\"\n    }\n  ],\n  \"highUsageEnabled\": \"<boolean>\",\n  \"highUsageEmailEnabled\": \"<boolean>\",\n  \"highUsageWebhookEnabled\": \"<boolean>\",\n  \"highUsagePeriodMinutes\": \"<number>\",\n  \"highUsageTiers\": [\n    {\n      \"tier\": \"<string>\",\n      \"cents\": \"<number>\"\n    }\n  ],\n  \"autoTopupNotificationsEnabled\": \"<boolean>\",\n  \"autoTopupEmailEnabled\": \"<boolean>\",\n  \"autoTopupWebhookEnabled\": \"<boolean>\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "id": "0ce74bc4-ba48-405c-b700-8d110a7350f5",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v2",
+                    "billing",
+                    "notifications",
+                    "config"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "PATCH",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"lowBalanceEnabled\": true,\n  \"lowBalanceEmailEnabled\": true,\n  \"lowBalanceWebhookEnabled\": true,\n  \"lowBalanceTiers\": [\n    {\n      \"tier\": \"warning\",\n      \"cents\": 100000\n    }\n  ],\n  \"globalHighUsageEnabled\": false,\n  \"globalHighUsageEmailEnabled\": true,\n  \"globalHighUsageWebhookEnabled\": true,\n  \"globalHighUsagePeriodMinutes\": 1440,\n  \"globalHighUsageTiers\": [\n    {\n      \"tier\": \"warning\",\n      \"cents\": 100000\n    }\n  ],\n  \"highUsageEnabled\": false,\n  \"highUsageEmailEnabled\": true,\n  \"highUsageWebhookEnabled\": true,\n  \"highUsagePeriodMinutes\": 1440,\n  \"highUsageTiers\": [\n    {\n      \"tier\": \"warning\",\n      \"cents\": 100000\n    }\n  ],\n  \"autoTopupNotificationsEnabled\": false,\n  \"autoTopupEmailEnabled\": true,\n  \"autoTopupWebhookEnabled\": true\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"lowBalanceEnabled\": false,\n  \"lowBalanceEmailEnabled\": true,\n  \"lowBalanceWebhookEnabled\": true,\n  \"lowBalanceTiers\": [\n    {\n      \"tier\": \"warning\",\n      \"cents\": 100000\n    },\n    {\n      \"tier\": \"warning\",\n      \"cents\": 100000\n    }\n  ],\n  \"globalHighUsageEnabled\": false,\n  \"globalHighUsageEmailEnabled\": true,\n  \"globalHighUsageWebhookEnabled\": true,\n  \"globalHighUsagePeriodMinutes\": 1440,\n  \"globalHighUsageTiers\": [\n    {\n      \"tier\": \"warning\",\n      \"cents\": 100000\n    },\n    {\n      \"tier\": \"warning\",\n      \"cents\": 100000\n    }\n  ],\n  \"highUsageEnabled\": false,\n  \"highUsageEmailEnabled\": true,\n  \"highUsageWebhookEnabled\": true,\n  \"highUsagePeriodMinutes\": 1440,\n  \"highUsageTiers\": [\n    {\n      \"tier\": \"warning\",\n      \"cents\": 100000\n    },\n    {\n      \"tier\": \"warning\",\n      \"cents\": 100000\n    }\n  ],\n  \"autoTopupNotificationsEnabled\": false,\n  \"autoTopupEmailEnabled\": true,\n  \"autoTopupWebhookEnabled\": true\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "c02578a6-3e19-4904-bcf9-7c2843dc5949",
+          "name": "List recent billing notification events",
+          "request": {
+            "name": "List recent billing notification events",
+            "description": {},
+            "url": {
+              "path": [
+                "v2",
+                "billing",
+                "notifications",
+                "recent"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [
+                {
+                  "disabled": false,
+                  "key": "limit",
+                  "value": "<number>",
+                  "description": "Max events to return (1–200, default 50)."
+                }
+              ],
+              "variable": []
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "GET",
+            "auth": {
+              "type": "apikey",
+              "apikey": [
+                {
+                  "key": "key",
+                  "value": "x-api-key"
+                },
+                {
+                  "key": "value",
+                  "value": "{{apiKey}}"
+                },
+                {
+                  "key": "in",
+                  "value": "header"
+                }
+              ]
+            }
+          },
+          "response": [
+            {
+              "id": "bee7a83b-b88a-43a5-b869-8e17515ee862",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v2",
+                    "billing",
+                    "notifications",
+                    "recent"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "limit",
+                      "value": "<number>"
+                    }
+                  ],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "[\n  {\n    \"id\": \"e8f4c2a1-3b7d-4e9f-8a1c-6b5d3e2a9f01\",\n    \"kind\": \"low_balance\",\n    \"identifier\": \"warning\",\n    \"accountId\": \"acc_01H8XYZ...\",\n    \"dedupKey\": \"low_balance:warning:acc_01H8XYZ:2026-04-22\",\n    \"firedAt\": \"2026-04-22T08:12:34.567Z\",\n    \"payload\": {\n      \"tierCents\": 100000,\n      \"balanceCents\": 85000\n    },\n    \"emailSent\": true,\n    \"webhookSent\": true,\n    \"workspaceId\": \"a1b2c3d4-e5f6-7890-abcd-ef1234567890\"\n  },\n  {\n    \"id\": \"e8f4c2a1-3b7d-4e9f-8a1c-6b5d3e2a9f01\",\n    \"kind\": \"low_balance\",\n    \"identifier\": \"warning\",\n    \"accountId\": \"acc_01H8XYZ...\",\n    \"dedupKey\": \"low_balance:warning:acc_01H8XYZ:2026-04-22\",\n    \"firedAt\": \"2026-04-22T08:12:34.567Z\",\n    \"payload\": {\n      \"tierCents\": 100000,\n      \"balanceCents\": 85000\n    },\n    \"emailSent\": true,\n    \"webhookSent\": true,\n    \"workspaceId\": \"a1b2c3d4-e5f6-7890-abcd-ef1234567890\"\n  }\n]",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "3700190d-748c-447c-becf-b0de40298445",
+          "name": "Get resolved workspace billing notification view (override + account)",
+          "request": {
+            "name": "Get resolved workspace billing notification view (override + account)",
+            "description": {},
+            "url": {
+              "path": [
+                "v2",
+                "billing",
+                "notifications",
+                "workspaces",
+                ":workspaceId",
+                "config"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<string>",
+                  "key": "workspaceId",
+                  "description": "(Required) "
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "GET",
+            "auth": {
+              "type": "apikey",
+              "apikey": [
+                {
+                  "key": "key",
+                  "value": "x-api-key"
+                },
+                {
+                  "key": "value",
+                  "value": "{{apiKey}}"
+                },
+                {
+                  "key": "in",
+                  "value": "header"
+                }
+              ]
+            }
+          },
+          "response": [
+            {
+              "id": "439e2625-9bd8-4405-b84c-53b15d937bdf",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v2",
+                    "billing",
+                    "notifications",
+                    "workspaces",
+                    ":workspaceId",
+                    "config"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<string>",
+                      "key": "workspaceId",
+                      "description": "(Required) "
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"accountConfig\": {\n    \"lowBalanceEnabled\": false,\n    \"lowBalanceEmailEnabled\": true,\n    \"lowBalanceWebhookEnabled\": true,\n    \"lowBalanceTiers\": [\n      {\n        \"tier\": \"warning\",\n        \"cents\": 100000\n      },\n      {\n        \"tier\": \"warning\",\n        \"cents\": 100000\n      }\n    ],\n    \"globalHighUsageEnabled\": false,\n    \"globalHighUsageEmailEnabled\": true,\n    \"globalHighUsageWebhookEnabled\": true,\n    \"globalHighUsagePeriodMinutes\": 1440,\n    \"globalHighUsageTiers\": [\n      {\n        \"tier\": \"warning\",\n        \"cents\": 100000\n      },\n      {\n        \"tier\": \"warning\",\n        \"cents\": 100000\n      }\n    ],\n    \"highUsageEnabled\": false,\n    \"highUsageEmailEnabled\": true,\n    \"highUsageWebhookEnabled\": true,\n    \"highUsagePeriodMinutes\": 1440,\n    \"highUsageTiers\": [\n      {\n        \"tier\": \"warning\",\n        \"cents\": 100000\n      },\n      {\n        \"tier\": \"warning\",\n        \"cents\": 100000\n      }\n    ],\n    \"autoTopupNotificationsEnabled\": false,\n    \"autoTopupEmailEnabled\": true,\n    \"autoTopupWebhookEnabled\": true\n  },\n  \"workspaceOverride\": {\n    \"id\": \"f2b5e0b8-1a3c-4f7e-9d2a-7c6b8a1d4e52\",\n    \"workspaceId\": \"a1b2c3d4-e5f6-7890-abcd-ef1234567890\",\n    \"createdAt\": \"2026-04-15T12:34:56.789Z\",\n    \"updatedAt\": \"2026-04-22T08:12:34.567Z\",\n    \"highUsageEnabled\": true,\n    \"highUsageEmailEnabled\": true,\n    \"highUsageWebhookEnabled\": true,\n    \"highUsagePeriodMinutes\": 720,\n    \"highUsageTiers\": [\n      {\n        \"tier\": \"warning\",\n        \"cents\": 100000\n      },\n      {\n        \"tier\": \"warning\",\n        \"cents\": 100000\n      }\n    ]\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "6568c5db-fd78-4346-a777-9682a8e2da38",
+          "name": "Upsert workspace high-usage override",
+          "request": {
+            "name": "Upsert workspace high-usage override",
+            "description": {},
+            "url": {
+              "path": [
+                "v2",
+                "billing",
+                "notifications",
+                "workspaces",
+                ":workspaceId",
+                "config"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<string>",
+                  "key": "workspaceId",
+                  "description": "(Required) "
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "PATCH",
+            "auth": {
+              "type": "apikey",
+              "apikey": [
+                {
+                  "key": "key",
+                  "value": "x-api-key"
+                },
+                {
+                  "key": "value",
+                  "value": "{{apiKey}}"
+                },
+                {
+                  "key": "in",
+                  "value": "header"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"highUsageEnabled\": \"<boolean>\",\n  \"highUsageEmailEnabled\": \"<boolean>\",\n  \"highUsageWebhookEnabled\": \"<boolean>\",\n  \"highUsagePeriodMinutes\": \"<number>\",\n  \"highUsageTiers\": [\n    {\n      \"tier\": \"<string>\",\n      \"cents\": \"<number>\"\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "id": "0fb4b13a-394c-461f-8219-691eae865c19",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v2",
+                    "billing",
+                    "notifications",
+                    "workspaces",
+                    ":workspaceId",
+                    "config"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<string>",
+                      "key": "workspaceId",
+                      "description": "(Required) "
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "PATCH",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"highUsageEnabled\": true,\n  \"highUsageEmailEnabled\": true,\n  \"highUsageWebhookEnabled\": true,\n  \"highUsagePeriodMinutes\": 1440,\n  \"highUsageTiers\": [\n    {\n      \"tier\": \"warning\",\n      \"cents\": 100000\n    }\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"id\": \"f2b5e0b8-1a3c-4f7e-9d2a-7c6b8a1d4e52\",\n  \"workspaceId\": \"a1b2c3d4-e5f6-7890-abcd-ef1234567890\",\n  \"createdAt\": \"2026-04-15T12:34:56.789Z\",\n  \"updatedAt\": \"2026-04-22T08:12:34.567Z\",\n  \"highUsageEnabled\": true,\n  \"highUsageEmailEnabled\": true,\n  \"highUsageWebhookEnabled\": true,\n  \"highUsagePeriodMinutes\": 720,\n  \"highUsageTiers\": [\n    {\n      \"tier\": \"warning\",\n      \"cents\": 100000\n    },\n    {\n      \"tier\": \"warning\",\n      \"cents\": 100000\n    }\n  ]\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "cdde7bd5-71b6-4a42-af89-7eb5c5f33ecc",
+          "name": "Remove workspace high-usage override",
+          "request": {
+            "name": "Remove workspace high-usage override",
+            "description": {},
+            "url": {
+              "path": [
+                "v2",
+                "billing",
+                "notifications",
+                "workspaces",
+                ":workspaceId",
+                "config"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<string>",
+                  "key": "workspaceId",
+                  "description": "(Required) "
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "DELETE",
+            "auth": {
+              "type": "apikey",
+              "apikey": [
+                {
+                  "key": "key",
+                  "value": "x-api-key"
+                },
+                {
+                  "key": "value",
+                  "value": "{{apiKey}}"
+                },
+                {
+                  "key": "in",
+                  "value": "header"
+                }
+              ]
+            }
+          },
+          "response": [
+            {
+              "id": "758c1bb2-d3d8-493d-9cbe-8e7b6477b69f",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v2",
+                    "billing",
+                    "notifications",
+                    "workspaces",
+                    ":workspaceId",
+                    "config"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<string>",
+                      "key": "workspaceId",
+                      "description": "(Required) "
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "x-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "DELETE",
+                "body": {}
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"ok\": true\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        }
+      ],
+      "event": []
+    }
+  ],
+  "event": [],
+  "variable": [
+    {
+      "type": "string",
+      "value": "https://api.topograph.co",
+      "key": "baseUrl"
+    }
+  ],
+  "auth": {
+    "type": "apikey",
+    "apikey": [
+      {
+        "key": "key",
+        "value": "x-api-key"
+      },
+      {
+        "key": "value",
+        "value": "{{apiKey}}"
+      },
+      {
+        "key": "in",
+        "value": "header"
+      }
+    ]
+  },
+  "info": {
+    "_postman_id": "91cb7959-a5b5-46c9-bf9b-d0fbf166ce6b",
+    "name": "Topograph Billing Billing Notifications API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": {
+      "content": "The Topograph API",
+      "type": "text/plain"
+    }
+  }
+}

@@ -1,0 +1,165 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "Topograph Billing Billing Notifications API",
+    "version": "0.1"
+  },
+  "request": {
+    "auth": {
+      "type": "apikey",
+      "key": "x-api-key",
+      "value": "{{x-api-key}}",
+      "placement": "header"
+    }
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Billing Notifications",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Get resolved billing notification config (defaults merged)",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.topograph.co/v2/billing/notifications/config",
+            "auth": {
+              "type": "apikey",
+              "key": "x-api-key",
+              "value": "{{x-api-key}}",
+              "placement": "header"
+            }
+          },
+          "docs": "Get resolved billing notification config (defaults merged)"
+        },
+        {
+          "info": {
+            "name": "Upsert billing notification config",
+            "type": "http"
+          },
+          "http": {
+            "method": "PATCH",
+            "url": "https://api.topograph.co/v2/billing/notifications/config",
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "apikey",
+              "key": "x-api-key",
+              "value": "{{x-api-key}}",
+              "placement": "header"
+            }
+          },
+          "docs": "Upsert billing notification config"
+        },
+        {
+          "info": {
+            "name": "List recent billing notification events",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.topograph.co/v2/billing/notifications/recent",
+            "params": [
+              {
+                "name": "limit",
+                "value": "",
+                "type": "query",
+                "description": "Max events to return (1–200, default 50)."
+              }
+            ],
+            "auth": {
+              "type": "apikey",
+              "key": "x-api-key",
+              "value": "{{x-api-key}}",
+              "placement": "header"
+            }
+          },
+          "docs": "List recent billing notification events"
+        },
+        {
+          "info": {
+            "name": "Get resolved workspace billing notification view (override + account)",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.topograph.co/v2/billing/notifications/workspaces/:workspaceId/config",
+            "params": [
+              {
+                "name": "workspaceId",
+                "value": "",
+                "type": "path"
+              }
+            ],
+            "auth": {
+              "type": "apikey",
+              "key": "x-api-key",
+              "value": "{{x-api-key}}",
+              "placement": "header"
+            }
+          },
+          "docs": "Get resolved workspace billing notification view (override + account)"
+        },
+        {
+          "info": {
+            "name": "Upsert workspace high-usage override",
+            "type": "http"
+          },
+          "http": {
+            "method": "PATCH",
+            "url": "https://api.topograph.co/v2/billing/notifications/workspaces/:workspaceId/config",
+            "params": [
+              {
+                "name": "workspaceId",
+                "value": "",
+                "type": "path"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "apikey",
+              "key": "x-api-key",
+              "value": "{{x-api-key}}",
+              "placement": "header"
+            }
+          },
+          "docs": "Upsert workspace high-usage override"
+        },
+        {
+          "info": {
+            "name": "Remove workspace high-usage override",
+            "type": "http"
+          },
+          "http": {
+            "method": "DELETE",
+            "url": "https://api.topograph.co/v2/billing/notifications/workspaces/:workspaceId/config",
+            "params": [
+              {
+                "name": "workspaceId",
+                "value": "",
+                "type": "path"
+              }
+            ],
+            "auth": {
+              "type": "apikey",
+              "key": "x-api-key",
+              "value": "{{x-api-key}}",
+              "placement": "header"
+            }
+          },
+          "docs": "Remove workspace high-usage override"
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}
