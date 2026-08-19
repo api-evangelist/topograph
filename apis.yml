@@ -37,7 +37,7 @@ x-enrichment:
 x-company:
   legal_name: Topograph SAS
   registration: SIREN 932884117, RCS Paris
-specificationVersion: '0.20'
+specificationVersion: '0.23'
 created: '2026-07-17'
 modified: '2026-07-21'
 tags:
