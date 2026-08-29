@@ -9,6 +9,18 @@ description: >-
   neobanks and compliance software vendors, Topograph is exposed as a REST API (x-api-key) with a
   published MCP server, an x402 agentic-commerce surface, and pay-per-request pricing, backed by
   SOC 2 Type 2 and ISO 27001:2022 certifications.
+deliveryModel:
+  model: saas
+  open_source: false
+  commercial: true
+  callable_host: true
+  label: Hosted service · you call their endpoint
+  confidence: high
+  source:
+  - openapi
+  - pricing
+  generated: '2026-08-28'
+  method: derived
 accessModel:
   pricing: unknown
   onboarding: self-serve
