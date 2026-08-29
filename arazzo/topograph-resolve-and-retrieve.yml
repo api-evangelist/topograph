@@ -4,8 +4,11 @@ info:
   version: 1.0.0
   summary: Search for a company, request its data and documents, then poll for the result.
 sourceDescriptions:
-- name: topograph
-  url: ../openapi/topograph-openapi-original.json
+- name: dataApi
+  url: ../openapi/topograph-data-api-openapi.yml
+  type: openapi
+- name: searchApi
+  url: ../openapi/topograph-search-api-openapi.yml
   type: openapi
 workflows:
 - workflowId: resolveAndRetrieveCompany
@@ -14,9 +17,9 @@ workflows:
     type: object
     required: [countryCode, query]
     properties:
-      countryCode: { type: string, example: FR }
-      query: { type: string, example: Acme SAS }
-      dataPoints: { type: array, items: { type: string }, example: [shareholders, ultimateBeneficialOwners] }
+      countryCode: {type: string, example: FR}
+      query: {type: string, example: Acme SAS}
+      dataPoints: {type: array, items: {type: string}, example: [shareholders, ultimateBeneficialOwners]}
   steps:
   - stepId: search
     operationId: SearchController_searchV2_v2

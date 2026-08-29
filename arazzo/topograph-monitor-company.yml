@@ -4,8 +4,8 @@ info:
   version: 1.0.0
   summary: Start monitoring a company, review its change logs, then stop monitoring.
 sourceDescriptions:
-- name: topograph
-  url: ../openapi/topograph-openapi-original.json
+- name: monitorsApi
+  url: ../openapi/topograph-monitors-api-openapi.yml
   type: openapi
 workflows:
 - workflowId: monitorCompanyLifecycle
@@ -14,9 +14,9 @@ workflows:
     type: object
     required: [companyId, countryCode]
     properties:
-      companyId: { type: string, example: '932884117' }
-      countryCode: { type: string, example: FR }
-      caseId: { type: string, example: case-12345 }
+      companyId: {type: string, example: '932884117'}
+      countryCode: {type: string, example: FR}
+      caseId: {type: string, example: case-12345}
   steps:
   - stepId: createMonitor
     operationId: MonitoringController_createMonitor_v2
