@@ -171,6 +171,8 @@ apis:
   humanURL: https://docs.topograph.co
   baseURL: https://api.topograph.co
   tags:
+  - Workspace
+  tags_raw:
   - Workspaces
   properties:
   - type: OpenAPI
