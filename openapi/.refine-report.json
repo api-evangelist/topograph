@@ -1,13 +1,8 @@
 {
   "provider": "topograph",
   "sources": [
-    "topograph-billing-api-openapi.yml",
-    "topograph-billing-notifications-api-openapi.yml",
-    "topograph-data-api-openapi.yml",
-    "topograph-monitors-api-openapi.yml",
-    "topograph-pricing-api-openapi.yml",
-    "topograph-search-api-openapi.yml",
-    "topograph-workspaces-api-openapi.yml"
+    "_original/topograph-openapi-original.json",
+    "_original/topograph-x402-openapi.json"
   ],
   "outputs": [
     "topograph-billing-api-openapi.yml",
@@ -21,6 +16,26 @@
   "archived": [],
   "errors": [],
   "warnings": [],
-  "notes": [],
-  "skipped": []
+  "notes": [
+    "sourced from openapi/_original/ (2 archived document(s)); previously refined output at the top level was skipped rather than re-split",
+    "topograph-openapi-original.json: upgraded openapi 3.0.0 -> OpenAPI 3.2.0",
+    "topograph-openapi-original.json: declared missing tag: Billing",
+    "topograph-openapi-original.json: declared missing tag: Billing Notifications",
+    "topograph-openapi-original.json: declared missing tag: Data",
+    "topograph-openapi-original.json: declared missing tag: Monitors",
+    "topograph-openapi-original.json: declared missing tag: Pricing",
+    "topograph-openapi-original.json: declared missing tag: Search",
+    "topograph-openapi-original.json: declared missing tag: Workspaces",
+    "topograph-x402-openapi.json: upgraded openapi 3.0.0 -> OpenAPI 3.2.0",
+    "apis.yml register: already-registered"
+  ],
+  "skipped": [
+    "topograph-billing-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "topograph-billing-notifications-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "topograph-data-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "topograph-monitors-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "topograph-pricing-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "topograph-search-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "topograph-workspaces-api-openapi.yml: previously refined output, superseded by openapi/_original/"
+  ]
 }

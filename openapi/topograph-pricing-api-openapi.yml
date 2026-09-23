@@ -1,6 +1,6 @@
-openapi: 3.0.0
+openapi: 3.2.0
 info:
-  title: Topograph Billing Pricing API
+  title: Topograph Pricing API
   description: The Topograph API
   version: '0.1'
   contact: {}
@@ -90,6 +90,35 @@ paths:
       - Pricing
 components:
   schemas:
+    PricingBlockDTO:
+      type: object
+      properties:
+        sku:
+          type: string
+          description: Block SKU identifier
+          example: ita-company-data
+        datapoints:
+          description: Datapoints covered by this block
+          example:
+          - company
+          - legalRepresentatives
+          type: array
+          items:
+            type: string
+        modes:
+          type: object
+          description: Pricing per mode. null means the block is not available in that mode.
+        includedDocuments:
+          description: Document types included free when this block is purchased
+          example:
+          - trade_register_extract
+          type: array
+          items:
+            type: string
+      required:
+      - sku
+      - datapoints
+      - modes
     GetPricingResultDTO:
       type: object
       properties:
@@ -146,35 +175,6 @@ components:
       - companyProfile
       - ultimateBeneficialOwners
       - availableDocuments
-    PricingBlockDTO:
-      type: object
-      properties:
-        sku:
-          type: string
-          description: Block SKU identifier
-          example: ita-company-data
-        datapoints:
-          description: Datapoints covered by this block
-          example:
-          - company
-          - legalRepresentatives
-          type: array
-          items:
-            type: string
-        modes:
-          type: object
-          description: Pricing per mode. null means the block is not available in that mode.
-        includedDocuments:
-          description: Document types included free when this block is purchased
-          example:
-          - trade_register_extract
-          type: array
-          items:
-            type: string
-      required:
-      - sku
-      - datapoints
-      - modes
     PricingAndAvailabilityDTO:
       type: object
       properties:

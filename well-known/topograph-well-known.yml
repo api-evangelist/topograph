@@ -1,4 +1,4 @@
-generated: '2026-07-21'
+generated: '2026-09-19'
 method: searched
 source: live probe of /.well-known/ on Topograph hosts
 hosts:
@@ -7,7 +7,8 @@ hosts:
   - path: /.well-known/oauth-authorization-server
     status: 200
     file: topograph-oauth-authorization-server.json
-    note: RFC 8414 metadata; authorization server is Clerk (clerk.topograph.co), used by the designer/MCP OAuth 2.1 flow
+    note: RFC 8414 metadata; authorization server is Clerk (clerk.topograph.co), used by the designer/MCP
+      OAuth 2.1 flow
   - path: /.well-known/security.txt
     status: 404
   - path: /.well-known/openid-configuration
@@ -16,12 +17,18 @@ hosts:
     status: 404
   - path: /.well-known/ai-plugin.json
     status: 404
+  - path: /.well-known/oauth-protected-resource
+    status: 200
+    file: topograph-api-oauth-protected-resource.json
+    bytes: 732
+  path_echo_control: passed
 - host: https://topograph.co
   documents:
   - path: /.well-known/api-catalog
     status: 200
     file: topograph-api-catalog.json
-    note: RFC 9727 linkset; advertises the main OpenAPI (docs.topograph.co/openapi.json), the x402 agentic-commerce OpenAPI, docs, and status endpoints
+    note: RFC 9727 linkset; advertises the main OpenAPI (docs.topograph.co/openapi.json), the x402 agentic-commerce
+      OpenAPI, docs, and status endpoints
   - path: /.well-known/security.txt
     status: 404
   - path: /.well-known/openid-configuration
@@ -30,3 +37,26 @@ hosts:
     status: 404
   - path: /.well-known/ai-plugin.json
     status: 404
+- host: https://clerk.topograph.co
+  documents:
+  - path: /.well-known/oauth-authorization-server
+    status: 200
+    file: topograph-clerk-oauth-authorization-server.json
+    bytes: 1224
+  path_echo_control: passed
+x-mcp-probe:
+  probed: '2026-09-19'
+  issue: roadmap#321, roadmap#337
+  documents:
+  - host: https://api.topograph.co
+    path: /.well-known/oauth-protected-resource
+    file: topograph-api-oauth-protected-resource.json
+  - host: https://clerk.topograph.co
+    path: /.well-known/oauth-authorization-server
+    file: topograph-clerk-oauth-authorization-server.json
+  validated_on: resource (RFC 9728) / issuer (RFC 8414, OIDC)
+  negative_control: one per host; a 2xx JSON object at an impossible path discards the host
+note: 'MCP-host OAuth discovery added 2026-09-19 (roadmap#321/#337): the harvest visits a provider''s
+  primary hosts, and RFC 9728 protected-resource metadata lives on the MCP host, so these documents existed
+  and were invisible to the scorer. Fetched live and validated on `resource`/`issuer`; one negative control
+  per host.'

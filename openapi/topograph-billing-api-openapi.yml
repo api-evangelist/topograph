@@ -1,4 +1,4 @@
-openapi: 3.0.0
+openapi: 3.2.0
 info:
   title: Topograph Billing API
   description: The Topograph API
@@ -30,6 +30,35 @@ paths:
       - Billing
 components:
   schemas:
+    BalanceResponseDto:
+      type: object
+      properties:
+        balanceInCreditCents:
+          type: number
+          description: Current remaining account balance, in credit cents.
+          example: 42350
+        status:
+          type: string
+          description: Derived health of the balance. `depleted` when the balance is at or below zero (new work is blocked); `low` when it is at or below the highest configured low-balance threshold; otherwise `ok`.
+          enum:
+          - ok
+          - low
+          - depleted
+          example: ok
+        autoTopup:
+          description: Read-only auto-topup posture for the account.
+          allOf:
+          - $ref: '#/components/schemas/AutoTopupSummaryDto'
+        lowBalanceThresholds:
+          description: Resolved low-balance thresholds. A low_balance notification fires when the balance drops at or below a tier. Returned here so a client can interpret `status` and surface the same thresholds it is alerted on.
+          type: array
+          items:
+            $ref: '#/components/schemas/LowBalanceTierDto'
+      required:
+      - balanceInCreditCents
+      - status
+      - autoTopup
+      - lowBalanceThresholds
     LowBalanceTierDto:
       type: object
       properties:
@@ -70,35 +99,6 @@ components:
       - enabled
       - thresholdInCreditCents
       - amountInCreditCents
-    BalanceResponseDto:
-      type: object
-      properties:
-        balanceInCreditCents:
-          type: number
-          description: Current remaining account balance, in credit cents.
-          example: 42350
-        status:
-          type: string
-          description: Derived health of the balance. `depleted` when the balance is at or below zero (new work is blocked); `low` when it is at or below the highest configured low-balance threshold; otherwise `ok`.
-          enum:
-          - ok
-          - low
-          - depleted
-          example: ok
-        autoTopup:
-          description: Read-only auto-topup posture for the account.
-          allOf:
-          - $ref: '#/components/schemas/AutoTopupSummaryDto'
-        lowBalanceThresholds:
-          description: Resolved low-balance thresholds. A low_balance notification fires when the balance drops at or below a tier. Returned here so a client can interpret `status` and surface the same thresholds it is alerted on.
-          type: array
-          items:
-            $ref: '#/components/schemas/LowBalanceTierDto'
-      required:
-      - balanceInCreditCents
-      - status
-      - autoTopup
-      - lowBalanceThresholds
   securitySchemes:
     x-api-key:
       type: apiKey

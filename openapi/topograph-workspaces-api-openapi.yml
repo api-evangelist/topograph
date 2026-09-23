@@ -1,6 +1,6 @@
-openapi: 3.0.0
+openapi: 3.2.0
 info:
-  title: Topograph Billing Workspaces API
+  title: Topograph Workspaces API
   description: The Topograph API
   version: '0.1'
   contact: {}
@@ -108,6 +108,14 @@ paths:
       - Workspaces
 components:
   schemas:
+    UpdateWorkspaceDto:
+      type: object
+      properties:
+        legalName:
+          type: string
+          description: New display-friendly legal name.
+          example: Acme Paris SAS
+          maxLength: 255
     CreateWorkspaceDto:
       type: object
       properties:
@@ -125,14 +133,6 @@ components:
       required:
       - name
       - legalName
-    UpdateWorkspaceDto:
-      type: object
-      properties:
-        legalName:
-          type: string
-          description: New display-friendly legal name.
-          example: Acme Paris SAS
-          maxLength: 255
   securitySchemes:
     x-api-key:
       type: apiKey
