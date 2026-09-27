@@ -211,56 +211,6 @@ paths:
       - Monitors
 components:
   schemas:
-    CreateMonitorResponseDto:
-      type: object
-      properties:
-        id:
-          type: string
-          description: The unique identifier for the monitor
-          example: cmfzlu1dt000j12ldeqrfszq0
-        companyId:
-          type: string
-          description: The company ID being monitored
-          example: '123456789'
-        countryCode:
-          type: string
-          description: The country code for the monitored company
-          example: DE
-        metadata:
-          type: object
-          additionalProperties:
-            type: string
-          example:
-            caseId: case-12345
-          description: Key-value pairs provided at monitor creation, echoed back in responses and monitor.notification webhooks.
-      required:
-      - id
-      - companyId
-      - countryCode
-    ListMonitorsResponseDto:
-      type: object
-      properties:
-        monitors:
-          description: List of monitored companies
-          type: array
-          items:
-            $ref: '#/components/schemas/MonitorDto'
-        total:
-          type: number
-          description: Total number of monitors
-          example: 10
-        hasNextPage:
-          type: boolean
-          description: Whether there is a next page available
-          example: true
-        nextCursor:
-          type: string
-          description: Cursor for the next page
-          example: cmfzlu1dt000j12ldeqrfszq0
-      required:
-      - monitors
-      - total
-      - hasNextPage
     MonitorDetailsResponseDto:
       type: object
       properties:
@@ -441,6 +391,56 @@ components:
             caseId: case-12345
           description: 'Arbitrary key-value string pairs to associate with the monitor, echoed back in monitor responses and in every monitor.notification webhook. Use it to map notifications back to your internal records (e.g. a case ID). Calling POST /v2/monitors again for the same company replaces the stored metadata when the field is provided. Limits: max 50 keys, keys up to 40 chars (longer keys are skipped), values up to 500 chars (longer values are truncated).'
       required:
+      - companyId
+      - countryCode
+    ListMonitorsResponseDto:
+      type: object
+      properties:
+        monitors:
+          description: List of monitored companies
+          type: array
+          items:
+            $ref: '#/components/schemas/MonitorDto'
+        total:
+          type: number
+          description: Total number of monitors
+          example: 10
+        hasNextPage:
+          type: boolean
+          description: Whether there is a next page available
+          example: true
+        nextCursor:
+          type: string
+          description: Cursor for the next page
+          example: cmfzlu1dt000j12ldeqrfszq0
+      required:
+      - monitors
+      - total
+      - hasNextPage
+    CreateMonitorResponseDto:
+      type: object
+      properties:
+        id:
+          type: string
+          description: The unique identifier for the monitor
+          example: cmfzlu1dt000j12ldeqrfszq0
+        companyId:
+          type: string
+          description: The company ID being monitored
+          example: '123456789'
+        countryCode:
+          type: string
+          description: The country code for the monitored company
+          example: DE
+        metadata:
+          type: object
+          additionalProperties:
+            type: string
+          example:
+            caseId: case-12345
+          description: Key-value pairs provided at monitor creation, echoed back in responses and monitor.notification webhooks.
+      required:
+      - id
       - companyId
       - countryCode
     MonitorLogsResponseDto:

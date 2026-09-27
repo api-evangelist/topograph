@@ -90,35 +90,27 @@ paths:
       - Pricing
 components:
   schemas:
-    PricingBlockDTO:
+    PricingAndAvailabilityDTO:
       type: object
       properties:
-        sku:
+        available:
+          type: boolean
+          description: Whether the data point is available for this country
+          example: true
+        price:
+          type: number
+          description: The price in credits for this data point (verification mode)
+          example: 1.5
+        pricingMode:
           type: string
-          description: Block SKU identifier
-          example: ita-company-data
-        datapoints:
-          description: Datapoints covered by this block
-          example:
-          - company
-          - legalRepresentatives
-          type: array
-          items:
-            type: string
-        modes:
-          type: object
-          description: Pricing per mode. null means the block is not available in that mode.
-        includedDocuments:
-          description: Document types included free when this block is purchased
-          example:
-          - trade_register_extract
-          type: array
-          items:
-            type: string
+          description: Whether the price is fixed or variable (determined at request time). Omitted when fixed.
+          example: variable
+          enum:
+          - fixed
+          - variable
       required:
-      - sku
-      - datapoints
-      - modes
+      - available
+      - price
     GetPricingResultDTO:
       type: object
       properties:
@@ -175,27 +167,35 @@ components:
       - companyProfile
       - ultimateBeneficialOwners
       - availableDocuments
-    PricingAndAvailabilityDTO:
+    PricingBlockDTO:
       type: object
       properties:
-        available:
-          type: boolean
-          description: Whether the data point is available for this country
-          example: true
-        price:
-          type: number
-          description: The price in credits for this data point (verification mode)
-          example: 1.5
-        pricingMode:
+        sku:
           type: string
-          description: Whether the price is fixed or variable (determined at request time). Omitted when fixed.
-          example: variable
-          enum:
-          - fixed
-          - variable
+          description: Block SKU identifier
+          example: ita-company-data
+        datapoints:
+          description: Datapoints covered by this block
+          example:
+          - company
+          - legalRepresentatives
+          type: array
+          items:
+            type: string
+        modes:
+          type: object
+          description: Pricing per mode. null means the block is not available in that mode.
+        includedDocuments:
+          description: Document types included free when this block is purchased
+          example:
+          - trade_register_extract
+          type: array
+          items:
+            type: string
       required:
-      - available
-      - price
+      - sku
+      - datapoints
+      - modes
   securitySchemes:
     x-api-key:
       type: apiKey

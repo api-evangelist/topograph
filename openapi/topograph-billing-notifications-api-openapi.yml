@@ -141,15 +141,245 @@ paths:
       - Billing Notifications
 components:
   schemas:
-    DeleteWorkspaceOverrideResponseDto:
+    BillingNotificationWorkspaceOverrideDto:
       type: object
       properties:
-        ok:
+        id:
+          type: string
+          description: Override row ID.
+          example: f2b5e0b8-1a3c-4f7e-9d2a-7c6b8a1d4e52
+        workspaceId:
+          type: string
+          description: Workspace ID this override applies to.
+          example: a1b2c3d4-e5f6-7890-abcd-ef1234567890
+        createdAt:
+          type: string
+          description: Row creation timestamp.
+          example: '2026-04-15T12:34:56.789Z'
+          format: date-time
+        updatedAt:
+          type: string
+          description: Row last-update timestamp.
+          example: '2026-04-22T08:12:34.567Z'
+          format: date-time
+        highUsageEnabled:
+          type:
+          - boolean
+          - 'null'
+          description: Override for master high-usage toggle. Null means "inherit".
+          example: true
+        highUsageEmailEnabled:
+          type:
+          - boolean
+          - 'null'
+          description: Override for email routing. Null means "inherit".
+          example: true
+        highUsageWebhookEnabled:
+          type:
+          - boolean
+          - 'null'
+          description: Override for webhook routing. Null means "inherit".
+          example: true
+        highUsagePeriodMinutes:
+          type:
+          - number
+          - 'null'
+          description: Override for rolling window minutes. Null means "inherit".
+          example: 720
+        highUsageTiers:
+          description: Override for tier thresholds. Null means "inherit".
+          type:
+          - array
+          - 'null'
+          items:
+            $ref: '#/components/schemas/HighUsageTierDto'
+      required:
+      - id
+      - workspaceId
+      - createdAt
+      - updatedAt
+    LowBalanceTierDto:
+      type: object
+      properties:
+        tier:
+          type: string
+          description: Severity tier name. Must be unique within the array.
+          enum:
+          - warning
+          - critical
+          - depleted
+          example: warning
+        cents:
+          type: number
+          description: Threshold in cents (integer, same currency as the account). A notification fires when the account balance drops at or below this value.
+          example: 100000
+          minimum: 0
+      required:
+      - tier
+      - cents
+    BillingNotificationEventDto:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Event ID.
+          example: e8f4c2a1-3b7d-4e9f-8a1c-6b5d3e2a9f01
+        kind:
+          type: string
+          description: Notification kind.
+          enum:
+          - low_balance
+          - high_usage
+          - auto_topup
+          example: low_balance
+        identifier:
+          type: string
+          description: Tier name (`warning` / `critical` / `depleted`) for low_balance and high_usage, or outcome (`succeeded` / `failed`) for auto_topup.
+          example: warning
+        accountId:
+          type: string
+          description: Account the event belongs to.
+          example: acc_01H8XYZ...
+        workspaceId:
+          type:
+          - string
+          - 'null'
+          description: Workspace the event was scoped to, or null for account-level events.
+          example: a1b2c3d4-e5f6-7890-abcd-ef1234567890
+        dedupKey:
+          type: string
+          description: Dedup key used to enforce one-fire-per-threshold-per-period.
+          example: low_balance:warning:acc_01H8XYZ:2026-04-22
+        firedAt:
+          type: string
+          description: When the event fired.
+          example: '2026-04-22T08:12:34.567Z'
+          format: date-time
+        payload:
+          type: object
+          description: Kind-specific payload (threshold cents, period info, auto-topup details, etc.).
+          additionalProperties: true
+          example:
+            tierCents: 100000
+            balanceCents: 85000
+        emailSent:
           type: boolean
-          description: Always true on success (the operation is idempotent).
+          description: Whether an email was dispatched.
+          example: true
+        webhookSent:
+          type: boolean
+          description: Whether a webhook was dispatched.
           example: true
       required:
-      - ok
+      - id
+      - kind
+      - identifier
+      - accountId
+      - dedupKey
+      - firedAt
+      - payload
+      - emailSent
+      - webhookSent
+    UpdateBillingNotificationConfigDto:
+      type: object
+      properties:
+        lowBalanceEnabled:
+          type: boolean
+          description: Master toggle for low-balance notifications. Defaults to false on new accounts (strictly opt-in).
+          example: true
+        lowBalanceEmailEnabled:
+          type: boolean
+          description: Route low-balance notifications via email. Applied when lowBalanceEnabled is true.
+          example: true
+        lowBalanceWebhookEnabled:
+          type: boolean
+          description: Route low-balance notifications via webhook. Applied when lowBalanceEnabled is true.
+          example: true
+        lowBalanceTiers:
+          description: Ordered list of low-balance tiers. Each tier fires once when the account balance drops at or below its `cents` threshold. Tier names must be unique.
+          minItems: 1
+          maxItems: 10
+          type: array
+          items:
+            $ref: '#/components/schemas/LowBalanceTierDto'
+        globalHighUsageEnabled:
+          type: boolean
+          description: Master toggle for global (account-aggregate) high-usage notifications. Defaults to false on new accounts.
+          example: false
+        globalHighUsageEmailEnabled:
+          type: boolean
+          description: Route global high-usage notifications via email.
+          example: true
+        globalHighUsageWebhookEnabled:
+          type: boolean
+          description: Route global high-usage notifications via webhook.
+          example: true
+        globalHighUsagePeriodMinutes:
+          type: number
+          description: Rolling window, in minutes, used to sum account-aggregate spend when evaluating global high-usage tiers. Min 5 (5 minutes), max 43200 (30 days).
+          example: 1440
+          minimum: 5
+          maximum: 43200
+        globalHighUsageTiers:
+          description: Global high-usage tiers. Fires when the sum of spend across ALL workspaces (plus the account-wide bucket) over the rolling window meets-or-exceeds `cents`.
+          minItems: 1
+          maxItems: 5
+          type: array
+          items:
+            $ref: '#/components/schemas/HighUsageTierDto'
+        highUsageEnabled:
+          type: boolean
+          description: Master toggle for per-workspace high-usage notifications. These thresholds are applied individually to each workspace; a workspace can override them via the workspace-override endpoint.
+          example: false
+        highUsageEmailEnabled:
+          type: boolean
+          description: Route per-workspace high-usage notifications via email.
+          example: true
+        highUsageWebhookEnabled:
+          type: boolean
+          description: Route per-workspace high-usage notifications via webhook.
+          example: true
+        highUsagePeriodMinutes:
+          type: number
+          description: Rolling window, in minutes, used to sum per-workspace spend when evaluating high-usage tiers. Min 5, max 43200.
+          example: 1440
+          minimum: 5
+          maximum: 43200
+        highUsageTiers:
+          description: Per-workspace high-usage tiers. Fires when a single workspace's spend over the rolling window meets-or-exceeds `cents`.
+          minItems: 1
+          maxItems: 5
+          type: array
+          items:
+            $ref: '#/components/schemas/HighUsageTierDto'
+        autoTopupNotificationsEnabled:
+          type: boolean
+          description: Master toggle for auto-topup outcome notifications (succeeded / failed). Distinct from Account.autoTopupEnabled, which controls the charge itself. Defaults to false on new accounts.
+          example: false
+        autoTopupEmailEnabled:
+          type: boolean
+          description: Route auto-topup outcome notifications via email.
+          example: true
+        autoTopupWebhookEnabled:
+          type: boolean
+          description: Route auto-topup outcome notifications via webhook.
+          example: true
+    WorkspaceBillingNotificationViewDto:
+      type: object
+      properties:
+        accountConfig:
+          description: Fully resolved account-level config (defaults merged).
+          allOf:
+          - $ref: '#/components/schemas/ResolvedBillingNotificationConfigDto'
+        workspaceOverride:
+          description: Raw workspace-override row, or null if the workspace inherits everything.
+          type:
+          - object
+          - 'null'
+          allOf:
+          - $ref: '#/components/schemas/BillingNotificationWorkspaceOverrideDto'
+      required:
+      - accountConfig
     ResolvedBillingNotificationConfigDto:
       type: object
       properties:
@@ -242,90 +472,33 @@ components:
       - autoTopupNotificationsEnabled
       - autoTopupEmailEnabled
       - autoTopupWebhookEnabled
-    UpdateBillingNotificationConfigDto:
+    DeleteWorkspaceOverrideResponseDto:
       type: object
       properties:
-        lowBalanceEnabled:
+        ok:
           type: boolean
-          description: Master toggle for low-balance notifications. Defaults to false on new accounts (strictly opt-in).
+          description: Always true on success (the operation is idempotent).
           example: true
-        lowBalanceEmailEnabled:
-          type: boolean
-          description: Route low-balance notifications via email. Applied when lowBalanceEnabled is true.
-          example: true
-        lowBalanceWebhookEnabled:
-          type: boolean
-          description: Route low-balance notifications via webhook. Applied when lowBalanceEnabled is true.
-          example: true
-        lowBalanceTiers:
-          description: Ordered list of low-balance tiers. Each tier fires once when the account balance drops at or below its `cents` threshold. Tier names must be unique.
-          minItems: 1
-          maxItems: 10
-          type: array
-          items:
-            $ref: '#/components/schemas/LowBalanceTierDto'
-        globalHighUsageEnabled:
-          type: boolean
-          description: Master toggle for global (account-aggregate) high-usage notifications. Defaults to false on new accounts.
-          example: false
-        globalHighUsageEmailEnabled:
-          type: boolean
-          description: Route global high-usage notifications via email.
-          example: true
-        globalHighUsageWebhookEnabled:
-          type: boolean
-          description: Route global high-usage notifications via webhook.
-          example: true
-        globalHighUsagePeriodMinutes:
+      required:
+      - ok
+    HighUsageTierDto:
+      type: object
+      properties:
+        tier:
+          type: string
+          description: Severity tier name. Must be unique within the array.
+          enum:
+          - warning
+          - critical
+          example: warning
+        cents:
           type: number
-          description: Rolling window, in minutes, used to sum account-aggregate spend when evaluating global high-usage tiers. Min 5 (5 minutes), max 43200 (30 days).
-          example: 1440
-          minimum: 5
-          maximum: 43200
-        globalHighUsageTiers:
-          description: Global high-usage tiers. Fires when the sum of spend across ALL workspaces (plus the account-wide bucket) over the rolling window meets-or-exceeds `cents`.
-          minItems: 1
-          maxItems: 5
-          type: array
-          items:
-            $ref: '#/components/schemas/HighUsageTierDto'
-        highUsageEnabled:
-          type: boolean
-          description: Master toggle for per-workspace high-usage notifications. These thresholds are applied individually to each workspace; a workspace can override them via the workspace-override endpoint.
-          example: false
-        highUsageEmailEnabled:
-          type: boolean
-          description: Route per-workspace high-usage notifications via email.
-          example: true
-        highUsageWebhookEnabled:
-          type: boolean
-          description: Route per-workspace high-usage notifications via webhook.
-          example: true
-        highUsagePeriodMinutes:
-          type: number
-          description: Rolling window, in minutes, used to sum per-workspace spend when evaluating high-usage tiers. Min 5, max 43200.
-          example: 1440
-          minimum: 5
-          maximum: 43200
-        highUsageTiers:
-          description: Per-workspace high-usage tiers. Fires when a single workspace's spend over the rolling window meets-or-exceeds `cents`.
-          minItems: 1
-          maxItems: 5
-          type: array
-          items:
-            $ref: '#/components/schemas/HighUsageTierDto'
-        autoTopupNotificationsEnabled:
-          type: boolean
-          description: Master toggle for auto-topup outcome notifications (succeeded / failed). Distinct from Account.autoTopupEnabled, which controls the charge itself. Defaults to false on new accounts.
-          example: false
-        autoTopupEmailEnabled:
-          type: boolean
-          description: Route auto-topup outcome notifications via email.
-          example: true
-        autoTopupWebhookEnabled:
-          type: boolean
-          description: Route auto-topup outcome notifications via webhook.
-          example: true
+          description: Spend threshold in cents over the rolling period. A notification fires when the rolling-period spend is at or above this value.
+          example: 100000
+          minimum: 0
+      required:
+      - tier
+      - cents
     UpdateWorkspaceHighUsageOverrideDto:
       type: object
       properties:
@@ -354,179 +527,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/HighUsageTierDto'
-    WorkspaceBillingNotificationViewDto:
-      type: object
-      properties:
-        accountConfig:
-          description: Fully resolved account-level config (defaults merged).
-          allOf:
-          - $ref: '#/components/schemas/ResolvedBillingNotificationConfigDto'
-        workspaceOverride:
-          description: Raw workspace-override row, or null if the workspace inherits everything.
-          type:
-          - object
-          - 'null'
-          allOf:
-          - $ref: '#/components/schemas/BillingNotificationWorkspaceOverrideDto'
-      required:
-      - accountConfig
-    BillingNotificationEventDto:
-      type: object
-      properties:
-        id:
-          type: string
-          description: Event ID.
-          example: e8f4c2a1-3b7d-4e9f-8a1c-6b5d3e2a9f01
-        kind:
-          type: string
-          description: Notification kind.
-          enum:
-          - low_balance
-          - high_usage
-          - auto_topup
-          example: low_balance
-        identifier:
-          type: string
-          description: Tier name (`warning` / `critical` / `depleted`) for low_balance and high_usage, or outcome (`succeeded` / `failed`) for auto_topup.
-          example: warning
-        accountId:
-          type: string
-          description: Account the event belongs to.
-          example: acc_01H8XYZ...
-        workspaceId:
-          type:
-          - string
-          - 'null'
-          description: Workspace the event was scoped to, or null for account-level events.
-          example: a1b2c3d4-e5f6-7890-abcd-ef1234567890
-        dedupKey:
-          type: string
-          description: Dedup key used to enforce one-fire-per-threshold-per-period.
-          example: low_balance:warning:acc_01H8XYZ:2026-04-22
-        firedAt:
-          type: string
-          description: When the event fired.
-          example: '2026-04-22T08:12:34.567Z'
-          format: date-time
-        payload:
-          type: object
-          description: Kind-specific payload (threshold cents, period info, auto-topup details, etc.).
-          additionalProperties: true
-          example:
-            tierCents: 100000
-            balanceCents: 85000
-        emailSent:
-          type: boolean
-          description: Whether an email was dispatched.
-          example: true
-        webhookSent:
-          type: boolean
-          description: Whether a webhook was dispatched.
-          example: true
-      required:
-      - id
-      - kind
-      - identifier
-      - accountId
-      - dedupKey
-      - firedAt
-      - payload
-      - emailSent
-      - webhookSent
-    LowBalanceTierDto:
-      type: object
-      properties:
-        tier:
-          type: string
-          description: Severity tier name. Must be unique within the array.
-          enum:
-          - warning
-          - critical
-          - depleted
-          example: warning
-        cents:
-          type: number
-          description: Threshold in cents (integer, same currency as the account). A notification fires when the account balance drops at or below this value.
-          example: 100000
-          minimum: 0
-      required:
-      - tier
-      - cents
-    BillingNotificationWorkspaceOverrideDto:
-      type: object
-      properties:
-        id:
-          type: string
-          description: Override row ID.
-          example: f2b5e0b8-1a3c-4f7e-9d2a-7c6b8a1d4e52
-        workspaceId:
-          type: string
-          description: Workspace ID this override applies to.
-          example: a1b2c3d4-e5f6-7890-abcd-ef1234567890
-        createdAt:
-          type: string
-          description: Row creation timestamp.
-          example: '2026-04-15T12:34:56.789Z'
-          format: date-time
-        updatedAt:
-          type: string
-          description: Row last-update timestamp.
-          example: '2026-04-22T08:12:34.567Z'
-          format: date-time
-        highUsageEnabled:
-          type:
-          - boolean
-          - 'null'
-          description: Override for master high-usage toggle. Null means "inherit".
-          example: true
-        highUsageEmailEnabled:
-          type:
-          - boolean
-          - 'null'
-          description: Override for email routing. Null means "inherit".
-          example: true
-        highUsageWebhookEnabled:
-          type:
-          - boolean
-          - 'null'
-          description: Override for webhook routing. Null means "inherit".
-          example: true
-        highUsagePeriodMinutes:
-          type:
-          - number
-          - 'null'
-          description: Override for rolling window minutes. Null means "inherit".
-          example: 720
-        highUsageTiers:
-          description: Override for tier thresholds. Null means "inherit".
-          type:
-          - array
-          - 'null'
-          items:
-            $ref: '#/components/schemas/HighUsageTierDto'
-      required:
-      - id
-      - workspaceId
-      - createdAt
-      - updatedAt
-    HighUsageTierDto:
-      type: object
-      properties:
-        tier:
-          type: string
-          description: Severity tier name. Must be unique within the array.
-          enum:
-          - warning
-          - critical
-          example: warning
-        cents:
-          type: number
-          description: Spend threshold in cents over the rolling period. A notification fires when the rolling-period spend is at or above this value.
-          example: 100000
-          minimum: 0
-      required:
-      - tier
-      - cents
   securitySchemes:
     x-api-key:
       type: apiKey
