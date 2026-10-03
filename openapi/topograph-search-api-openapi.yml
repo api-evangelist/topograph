@@ -188,14 +188,96 @@ paths:
       - Search
 components:
   schemas:
-    MatchType:
-      type: string
-      enum:
-      - id
-      - exactLegalName
-      - partialId
-      - default
-      description: 'The type of match that produced this result. "id" means a guaranteed 1:1 match from an ID-based search (e.g., VAT number, CCIAA+REA). "exactLegalName" means the legal name exactly matches the search query. "partialId" means matched by a partial identifier that is not guaranteed unique (e.g., REA without CCIAA). "default" is used when the exact matching criteria is unknown. Results are ordered: id > exactLegalName > partialId > default.'
+    FranceIdentifiers:
+      type: object
+      properties:
+        siren:
+          type: string
+          description: 'SIREN - Système d''Identification du Répertoire des Entreprises. Format: 9 digits (e.g., "443061841"). Issued by: INSEE (Institut National de la Statistique et des Études Économiques). This is the primary company identifier in France.'
+          example: '443061841'
+        siret:
+          type: string
+          description: 'SIRET - Système d''Identification du Répertoire des Établissements. Format: 14 digits = SIREN (9) + NIC (5) (e.g., "44306184100047"). Identifies a specific establishment (location) of a company. Issued by: INSEE.'
+          example: '44306184100047'
+        VAT:
+          type: string
+          description: 'TVA Intracommunautaire - French VAT number. Format: FR + 2 check digits + SIREN (e.g., "FR27443061841"). Issued by: Direction Générale des Finances Publiques (DGFiP). Required for EU cross-border transactions.'
+          example: FR27443061841
+        rna:
+          type: string
+          description: 'RNA - Répertoire National des Associations. Format: W + 9 digits (e.g., "W751234567"). Identifies associations registered in mainland France. Issued by: Préfecture.'
+          example: W751234567
+        rnaAlsaceMoselle:
+          type: string
+          description: 'RNA Alsace-Moselle - Special identifier for associations in the Alsace-Moselle region. Format: Letter + year + code + number (e.g., "A2002THI000075"). These associations are registered under local law (droit local).'
+          example: A2002THI000075
+      description: Identifiers for French companies (FR)
+    MatchReason:
+      type: object
+      properties:
+        matchType:
+          description: 'The type of match that produced this result. "id" means a guaranteed 1:1 match from an ID-based search (e.g., VAT number, CCIAA+REA). "exactLegalName" means the legal name exactly matches the search query. "partialId" means matched by a partial identifier that is not guaranteed unique (e.g., REA without CCIAA). "default" is used when the exact matching criteria is unknown. Results are ordered: id > exactLegalName > partialId > default.'
+          example: id
+          allOf:
+          - $ref: '#/components/schemas/MatchType'
+        identifier:
+          description: The identifier that matched this result. Present when matchType is "id" or "partialId". Shows which identifier type and value were used to find this company.
+          oneOf:
+          - $ref: '#/components/schemas/ItalyIdentifiers'
+            title: IT
+          - $ref: '#/components/schemas/FranceIdentifiers'
+            title: FR
+          example:
+            VAT: 02580590541
+      required:
+      - matchType
+    AddressDTO:
+      type: object
+      properties:
+        addressLine1:
+          type: string
+          description: First line of the address
+          example: 10 rue de la Fraternité
+        addressLine2:
+          type: string
+          description: Second line of the address
+          example: Topograph Building
+        city:
+          type: string
+          description: City of the address
+          example: Bagnolet
+        postalCode:
+          type: string
+          description: Postal code of the address
+          example: '93170'
+        region:
+          type: string
+          description: Region of the address
+          example: FR
+        countryCode:
+          type: string
+          description: Country of the address using ISO 3166-1 alpha-2 country code
+          example: FR
+        poBox:
+          type: string
+          description: Post Office Box number
+          example: PO Box 123
+        careOf:
+          type: string
+          description: Care of (c/o) recipient
+          example: c/o John Doe
+        state:
+          type: string
+          description: State of the address
+          example: Île-de-France
+        latitude:
+          type: number
+          description: Latitude coordinate
+          example: 59.9139
+        longitude:
+          type: number
+          description: Longitude coordinate
+          example: 10.7522
     SearchResult:
       type: object
       properties:
@@ -523,96 +605,6 @@ components:
       - legalName
       - countryCode
       - matchReason
-    FranceIdentifiers:
-      type: object
-      properties:
-        siren:
-          type: string
-          description: 'SIREN - Système d''Identification du Répertoire des Entreprises. Format: 9 digits (e.g., "443061841"). Issued by: INSEE (Institut National de la Statistique et des Études Économiques). This is the primary company identifier in France.'
-          example: '443061841'
-        siret:
-          type: string
-          description: 'SIRET - Système d''Identification du Répertoire des Établissements. Format: 14 digits = SIREN (9) + NIC (5) (e.g., "44306184100047"). Identifies a specific establishment (location) of a company. Issued by: INSEE.'
-          example: '44306184100047'
-        VAT:
-          type: string
-          description: 'TVA Intracommunautaire - French VAT number. Format: FR + 2 check digits + SIREN (e.g., "FR27443061841"). Issued by: Direction Générale des Finances Publiques (DGFiP). Required for EU cross-border transactions.'
-          example: FR27443061841
-        rna:
-          type: string
-          description: 'RNA - Répertoire National des Associations. Format: W + 9 digits (e.g., "W751234567"). Identifies associations registered in mainland France. Issued by: Préfecture.'
-          example: W751234567
-        rnaAlsaceMoselle:
-          type: string
-          description: 'RNA Alsace-Moselle - Special identifier for associations in the Alsace-Moselle region. Format: Letter + year + code + number (e.g., "A2002THI000075"). These associations are registered under local law (droit local).'
-          example: A2002THI000075
-      description: Identifiers for French companies (FR)
-    AddressDTO:
-      type: object
-      properties:
-        addressLine1:
-          type: string
-          description: First line of the address
-          example: 10 rue de la Fraternité
-        addressLine2:
-          type: string
-          description: Second line of the address
-          example: Topograph Building
-        city:
-          type: string
-          description: City of the address
-          example: Bagnolet
-        postalCode:
-          type: string
-          description: Postal code of the address
-          example: '93170'
-        region:
-          type: string
-          description: Region of the address
-          example: FR
-        countryCode:
-          type: string
-          description: Country of the address using ISO 3166-1 alpha-2 country code
-          example: FR
-        poBox:
-          type: string
-          description: Post Office Box number
-          example: PO Box 123
-        careOf:
-          type: string
-          description: Care of (c/o) recipient
-          example: c/o John Doe
-        state:
-          type: string
-          description: State of the address
-          example: Île-de-France
-        latitude:
-          type: number
-          description: Latitude coordinate
-          example: 59.9139
-        longitude:
-          type: number
-          description: Longitude coordinate
-          example: 10.7522
-    MatchReason:
-      type: object
-      properties:
-        matchType:
-          description: 'The type of match that produced this result. "id" means a guaranteed 1:1 match from an ID-based search (e.g., VAT number, CCIAA+REA). "exactLegalName" means the legal name exactly matches the search query. "partialId" means matched by a partial identifier that is not guaranteed unique (e.g., REA without CCIAA). "default" is used when the exact matching criteria is unknown. Results are ordered: id > exactLegalName > partialId > default.'
-          example: id
-          allOf:
-          - $ref: '#/components/schemas/MatchType'
-        identifier:
-          description: The identifier that matched this result. Present when matchType is "id" or "partialId". Shows which identifier type and value were used to find this company.
-          oneOf:
-          - $ref: '#/components/schemas/ItalyIdentifiers'
-            title: IT
-          - $ref: '#/components/schemas/FranceIdentifiers'
-            title: FR
-          example:
-            VAT: 02580590541
-      required:
-      - matchType
     ItalyIdentifiers:
       type: object
       properties:
@@ -633,6 +625,14 @@ components:
           description: 'REA Code - Registro Economico Amministrativo (Economic Administrative Register) number. Format: Numeric (e.g., "1234567"). Unique within each CCIAA province. Combined with CCIAA forms a unique identifier.'
           example: '1234567'
       description: Identifiers for Italian companies (IT)
+    MatchType:
+      type: string
+      enum:
+      - id
+      - exactLegalName
+      - partialId
+      - default
+      description: 'The type of match that produced this result. "id" means a guaranteed 1:1 match from an ID-based search (e.g., VAT number, CCIAA+REA). "exactLegalName" means the legal name exactly matches the search query. "partialId" means matched by a partial identifier that is not guaranteed unique (e.g., REA without CCIAA). "default" is used when the exact matching criteria is unknown. Results are ordered: id > exactLegalName > partialId > default.'
   securitySchemes:
     x-api-key:
       type: apiKey

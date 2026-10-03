@@ -254,82 +254,6 @@ components:
       - companyId
       - countryCode
       - createdAt
-    MonitorDto:
-      type: object
-      properties:
-        id:
-          type: string
-          description: The unique identifier for the monitor
-          example: cmfzlu1dt000j12ldeqrfszq0
-        companyId:
-          type: string
-          description: The company ID being monitored
-          example: '123456789'
-        countryCode:
-          type: string
-          description: The country code for the monitored company
-          example: DE
-        companyName:
-          type:
-          - string
-          - 'null'
-          description: The legal name of the monitored company
-          example: Topograph SAS
-        metadata:
-          type: object
-          additionalProperties:
-            type: string
-          example:
-            caseId: case-12345
-          description: Key-value pairs provided at monitor creation, echoed back in responses and monitor.notification webhooks.
-      required:
-      - id
-      - companyId
-      - countryCode
-    MonitorLogDto:
-      type: object
-      properties:
-        id:
-          type: string
-          description: The unique identifier for the log entry
-          example: cmfzlu1dt000j12ldeqrfszq0
-        changeDetected:
-          type: boolean
-          description: Whether a change was detected in this check
-          example: true
-        changeCategories:
-          description: Categories of detected changes
-          example:
-          - status
-          - address
-          type: array
-          items:
-            type: string
-        fetchStatus:
-          type: string
-          description: Status of the fetch operation
-          example: success
-          enum:
-          - success
-          - not_found
-          - error
-          - error_final
-        errorMessage:
-          type:
-          - string
-          - 'null'
-          description: Error message if the fetch failed
-          example: null
-        createdAt:
-          type: string
-          description: When this log entry was created
-          example: '2026-03-20T02:00:00.000Z'
-      required:
-      - id
-      - changeDetected
-      - changeCategories
-      - fetchStatus
-      - createdAt
     CreateMonitorDto:
       type: object
       properties:
@@ -393,6 +317,50 @@ components:
       required:
       - companyId
       - countryCode
+    MonitorLogDto:
+      type: object
+      properties:
+        id:
+          type: string
+          description: The unique identifier for the log entry
+          example: cmfzlu1dt000j12ldeqrfszq0
+        changeDetected:
+          type: boolean
+          description: Whether a change was detected in this check
+          example: true
+        changeCategories:
+          description: Categories of detected changes
+          example:
+          - status
+          - address
+          type: array
+          items:
+            type: string
+        fetchStatus:
+          type: string
+          description: Status of the fetch operation
+          example: success
+          enum:
+          - success
+          - not_found
+          - error
+          - error_final
+        errorMessage:
+          type:
+          - string
+          - 'null'
+          description: Error message if the fetch failed
+          example: null
+        createdAt:
+          type: string
+          description: When this log entry was created
+          example: '2026-03-20T02:00:00.000Z'
+      required:
+      - id
+      - changeDetected
+      - changeCategories
+      - fetchStatus
+      - createdAt
     ListMonitorsResponseDto:
       type: object
       properties:
@@ -432,6 +400,38 @@ components:
           type: string
           description: The country code for the monitored company
           example: DE
+        metadata:
+          type: object
+          additionalProperties:
+            type: string
+          example:
+            caseId: case-12345
+          description: Key-value pairs provided at monitor creation, echoed back in responses and monitor.notification webhooks.
+      required:
+      - id
+      - companyId
+      - countryCode
+    MonitorDto:
+      type: object
+      properties:
+        id:
+          type: string
+          description: The unique identifier for the monitor
+          example: cmfzlu1dt000j12ldeqrfszq0
+        companyId:
+          type: string
+          description: The company ID being monitored
+          example: '123456789'
+        countryCode:
+          type: string
+          description: The country code for the monitored company
+          example: DE
+        companyName:
+          type:
+          - string
+          - 'null'
+          description: The legal name of the monitored company
+          example: Topograph SAS
         metadata:
           type: object
           additionalProperties:
