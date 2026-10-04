@@ -108,6 +108,14 @@ paths:
       - Workspaces
 components:
   schemas:
+    UpdateWorkspaceDto:
+      type: object
+      properties:
+        legalName:
+          type: string
+          description: New display-friendly legal name.
+          example: Acme Paris SAS
+          maxLength: 255
     CreateWorkspaceDto:
       type: object
       properties:
@@ -125,14 +133,6 @@ components:
       required:
       - name
       - legalName
-    UpdateWorkspaceDto:
-      type: object
-      properties:
-        legalName:
-          type: string
-          description: New display-friendly legal name.
-          example: Acme Paris SAS
-          maxLength: 255
   securitySchemes:
     x-api-key:
       type: apiKey

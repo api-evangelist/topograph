@@ -90,27 +90,6 @@ paths:
       - Pricing
 components:
   schemas:
-    PricingAndAvailabilityDTO:
-      type: object
-      properties:
-        available:
-          type: boolean
-          description: Whether the data point is available for this country
-          example: true
-        price:
-          type: number
-          description: The price in credits for this data point (verification mode)
-          example: 1.5
-        pricingMode:
-          type: string
-          description: Whether the price is fixed or variable (determined at request time). Omitted when fixed.
-          example: variable
-          enum:
-          - fixed
-          - variable
-      required:
-      - available
-      - price
     PricingBlockDTO:
       type: object
       properties:
@@ -196,6 +175,27 @@ components:
       - companyProfile
       - ultimateBeneficialOwners
       - availableDocuments
+    PricingAndAvailabilityDTO:
+      type: object
+      properties:
+        available:
+          type: boolean
+          description: Whether the data point is available for this country
+          example: true
+        price:
+          type: number
+          description: The price in credits for this data point (verification mode)
+          example: 1.5
+        pricingMode:
+          type: string
+          description: Whether the price is fixed or variable (determined at request time). Omitted when fixed.
+          example: variable
+          enum:
+          - fixed
+          - variable
+      required:
+      - available
+      - price
   securitySchemes:
     x-api-key:
       type: apiKey

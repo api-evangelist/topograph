@@ -30,25 +30,6 @@ paths:
       - Billing
 components:
   schemas:
-    LowBalanceTierDto:
-      type: object
-      properties:
-        tier:
-          type: string
-          description: Severity tier name. Must be unique within the array.
-          enum:
-          - warning
-          - critical
-          - depleted
-          example: warning
-        cents:
-          type: number
-          description: Threshold in cents (integer, same currency as the account). A notification fires when the account balance drops at or below this value.
-          example: 100000
-          minimum: 0
-      required:
-      - tier
-      - cents
     BalanceResponseDto:
       type: object
       properties:
@@ -78,6 +59,25 @@ components:
       - status
       - autoTopup
       - lowBalanceThresholds
+    LowBalanceTierDto:
+      type: object
+      properties:
+        tier:
+          type: string
+          description: Severity tier name. Must be unique within the array.
+          enum:
+          - warning
+          - critical
+          - depleted
+          example: warning
+        cents:
+          type: number
+          description: Threshold in cents (integer, same currency as the account). A notification fires when the account balance drops at or below this value.
+          example: 100000
+          minimum: 0
+      required:
+      - tier
+      - cents
     AutoTopupSummaryDto:
       type: object
       properties:
