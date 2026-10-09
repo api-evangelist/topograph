@@ -30,3 +30,17 @@ deployment:
   probe: gated
   checked: '2026-08-12'
   source: catalog MCP census
+rfc9728:
+  endpoint: https://api.topograph.co/designer-mcp
+  metadata_url: https://api.topograph.co/.well-known/oauth-protected-resource/designer-mcp
+  discovered_via: WWW-Authenticate resource_metadata on an anonymous POST initialize
+  fetched: '2026-09-25'
+  http_status: 200
+  content_type: application/json
+  document:
+    resource: https://api.topograph.co/designer-mcp
+    authorization_servers:
+    - https://clerk.topograph.co
+    scopes_supported:
+    - email
+    - profile
