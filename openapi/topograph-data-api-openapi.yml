@@ -155,34 +155,89 @@ paths:
       - Data
 components:
   schemas:
-    DataSourceDTO:
+    FinancialStatementDTO:
       type: object
       properties:
-        type:
+        id:
           type: string
-          description: 'How the data was obtained: live_from_registry (fresh API call), cached_from_registry (database copy), inferred (simple derivation from registry data), ai_analysis (complex AI analysis from documents), private_source (paid data)'
-          enum:
-          - live_from_registry
-          - cached_from_registry
-          - inferred
-          - ai_analysis
-          - private_source
-          example: live_from_registry
-        register:
+        name:
           type: string
-          description: Machine-readable register code. Omitted for inferred and ai_analysis types.
-          example: inpi
-        documents:
-          description: Supporting documents (for ai_analysis type)
-          type: array
-          items:
-            $ref: '#/components/schemas/DataSourceDocumentDTO'
-        analysis:
+          description: Document name in the local language of the country where it was issued
+        description:
           type: string
-          description: AI reasoning summary explaining how the data was derived (for ai_analysis type)
-          example: Inferred from 2021 confirmation statement showing 100% ownership by KCA Deutag International 3 Limited
+          description: Document description in English
+        format:
+          type: string
+        estimatedDeliverySeconds:
+          type: number
+        url:
+          type: string
+        pdfUrl:
+          type: string
+          description: URL to converted PDF version (when original document is XML)
+        blobName:
+          type: string
+        price:
+          type: number
+          description: Fixed price in cents
+        priceMarkup:
+          type: number
+          description: Price markup percentage
+        date:
+          type: string
+        period:
+          $ref: '#/components/schemas/PeriodDTO'
+        extractedFinancialData:
+          description: Extracted financial data from the document (only available after document is downloaded and parsed)
+          allOf:
+          - $ref: '#/components/schemas/ExtractedFinancialDataDTO'
       required:
-      - type
+      - id
+      - name
+      - format
+    ItalyIdentifiers:
+      type: object
+      properties:
+        VAT:
+          type: string
+          description: 'Partita IVA (P.IVA) - VAT registration number. Format: 11 digits (e.g., "02580590541"). Issued by: Agenzia delle Entrate (Revenue Agency)'
+          example: 02580590541
+        Codice Fiscale:
+          type: string
+          description: 'Codice Fiscale - Tax identification code. Format: 16 alphanumeric characters for individuals (e.g., "RSSMRA70A01H501U"), 11 digits for companies (often same as VAT). Issued by: Agenzia delle Entrate (Revenue Agency)'
+          example: RSSMRA70A01H501U
+        CCIAA:
+          type: string
+          description: 'CCIAA - Camera di Commercio (Chamber of Commerce) province code. Format: 2-letter province code (e.g., "TO" for Torino, "MI" for Milano). Indicates which Chamber of Commerce the company is registered with.'
+          example: TO
+        REA Code:
+          type: string
+          description: 'REA Code - Registro Economico Amministrativo (Economic Administrative Register) number. Format: Numeric (e.g., "1234567"). Unique within each CCIAA province. Combined with CCIAA forms a unique identifier.'
+          example: '1234567'
+      description: Identifiers for Italian companies (IT)
+    DataPointStatusSucceeded:
+      type: object
+      properties:
+        cost:
+          type: number
+          description: The cost in credits for this data point or document
+          example: 10
+        costMarkup:
+          type: number
+          description: The percentage markup when final cost is not yet known
+          example: 20
+        status:
+          type: string
+          description: The data point completed successfully
+          enum:
+          - succeeded
+          example: succeeded
+        authoritative:
+          type: boolean
+          description: Whether the data comes from an authoritative official registry source
+          example: true
+      required:
+      - status
     CreateOnboardingRequestDTO:
       type: object
       properties:
@@ -251,36 +306,6 @@ components:
       required:
       - id
       - countryCode
-    PeriodDTO:
-      type: object
-      properties:
-        startDate:
-          $ref: '#/components/schemas/PeriodDateDTO'
-        endDate:
-          $ref: '#/components/schemas/PeriodDateDTO'
-    PersonNameDTO:
-      type: object
-      properties:
-        title:
-          type: string
-          description: Title of the person (e.g., Mr., Mrs., Dr.)
-        firstName:
-          type: string
-          description: First name of the person
-        middleName:
-          type: string
-          description: Middle name of the person
-        lastName:
-          type: string
-          description: Last name of the person
-        fullName:
-          type: string
-          description: Full name of the person
-        suffix:
-          type: string
-          description: Suffix of the name (e.g., Jr., Sr., III)
-      required:
-      - fullName
     PeriodDateDTO:
       type: object
       properties:
@@ -290,302 +315,6 @@ components:
           type: number
         day:
           type: number
-    GetCompanyResultDTO:
-      type: object
-      properties:
-        request:
-          description: The request
-          allOf:
-          - $ref: '#/components/schemas/RequestMetadataDTO'
-        company:
-          description: The main profile information of the company, including, if available, details such as name, registration number, address, and other core data.
-          allOf:
-          - $ref: '#/components/schemas/CompanyDTO'
-        ultimateBeneficialOwners:
-          description: The persons of significant control of the company, including, if available, their name, nationality, and other relevant details.
-          type: array
-          items:
-            $ref: '#/components/schemas/UltimateBeneficialOwnerDTO'
-        legalRepresentatives:
-          description: The legal representatives of the company, which can be either individuals or companies.
-          type: array
-          items:
-            $ref: '#/components/schemas/LegalRepresentativeDTO'
-        shareholders:
-          description: The shareholders of the company, which can be either individuals or companies.
-          type: array
-          items:
-            $ref: '#/components/schemas/ShareholderDTO'
-        subsidiaries:
-          description: Companies in which the queried company holds equity (downstream participations). Includes any equity stake regardless of size — the relationship classification (controlled, associated, minority investment) is derived from sharePercentage by the consumer.
-          type: array
-          items:
-            $ref: '#/components/schemas/SubsidiaryDTO'
-        establishments:
-          description: The establishments of the company, including physical locations where business activities are conducted.
-          type: array
-          items:
-            $ref: '#/components/schemas/EstablishmentDTO'
-        otherKeyPersons:
-          description: Other key persons associated with the company who do not have legal signing authority, such as board members, auditors, and compliance officers.
-          type: array
-          items:
-            $ref: '#/components/schemas/OtherKeyPersonDTO'
-        graph:
-          description: 'Ownership graph: the entities (`nodes`) and ownership relationships (`edges`) discovered while traversing the company structure, plus a human-readable `description`, a `mermaidDiagram` rendering, and traversal `metadata`. Individual nodes carry UBO flags (`flags.isUbo`, `flags.uboCalculationMethod`) and `totalOwnershipPercentage`.'
-          allOf:
-          - $ref: '#/components/schemas/EnhancedGraphResultDTO'
-        documents:
-          $ref: '#/components/schemas/DocumentsDTO'
-        companyRelationships:
-          type: array
-          items:
-            $ref: '#/components/schemas/CompanyRelationshipDTO'
-        dataSources:
-          description: Per-field data source provenance for each entity. Keys are field names, values describe the origin of the data.
-          allOf:
-          - $ref: '#/components/schemas/DataSourcesDTO'
-        enrichmentReport:
-          type: string
-          description: Human-readable summary of enrichment results when agenticEnrichment was requested.
-      required:
-      - request
-    SubsidiaryDTO:
-      type: object
-      properties:
-        entityId:
-          type: string
-          description: Unique identifier to track the same company across different roles (subsidiaries, shareholders, etc.). Since data is retrieved from multiple registries, the same entity may appear with slightly different names or details. This ID lets you correlate a subsidiary with its appearance elsewhere in the response.
-          example: company_001
-        company:
-          description: The company in which the queried company holds equity. Always present — a subsidiary is, by definition, a company.
-          allOf:
-          - $ref: '#/components/schemas/CompanyDTO'
-        sharePercentage:
-          type: number
-          description: Direct equity stake in the subsidiary, as a percentage (0–100). For Italian register data this maps to "percentuale-capitale" on the diritti-partecipazione element.
-          example: 75
-        totalSharePercentage:
-          type: number
-          description: Total equity stake including ownership held indirectly through other entities in the chain. Populated only when the source can compute consolidated ownership (e.g. financial statements). Sources that only carry direct stakes leave this undefined.
-          example: 80
-        votingRightsPercentage:
-          type: number
-          description: Voting-rights percentage in the subsidiary. May differ from sharePercentage when non-voting shares exist (preferred shares, dual-class structures). Populated when the source distinguishes equity from voting power.
-          example: 75
-        numberOfShares:
-          type: number
-          description: Absolute number of shares held in the subsidiary.
-          example: 1000
-        nominalCapitalHeld:
-          description: Total nominal (stated) capital value of the equity held in the subsidiary. Face value × number of shares. Equivalent to "valore nominale × n-azioni" in Italian InfoCamere data.
-          allOf:
-          - $ref: '#/components/schemas/MonetaryAmountDTO'
-        paidInAmount:
-          description: Total amount actually paid for the equity held, including any premium over nominal value. Italian "valore versato".
-          allOf:
-          - $ref: '#/components/schemas/MonetaryAmountDTO'
-        acquisitionDate:
-          type: string
-          description: 'Date the equity stake was acquired (ISO 8601: YYYY-MM-DD). Sourced from register filings — for Italian InfoCamere this is the earliest dt-evento on the participation record.'
-          example: '2020-06-15'
-        endDate:
-          type: string
-          description: 'Date the equity stake ended (sale, dissolution of the subsidiary, etc.). When present, the participation is historical rather than current. ISO 8601: YYYY-MM-DD.'
-          example: '2024-03-15'
-      required:
-      - company
-    DataPointError:
-      type: object
-      properties:
-        code:
-          type: string
-          description: Error code identifying the type of failure
-          example: resource_not_found
-          enum:
-          - resource_not_found
-          - service_unavailable
-          - processing_failed
-          - invalid_request
-          - datapoint_not_supported
-          - fast_source_unavailable
-          - onboarding_timeout
-          - insufficient_funds
-        message:
-          type: string
-          description: User-friendly error message explaining the failure
-          example: The requested company was not found. Please verify the registration number and try again.
-        details:
-          type: array
-          description: Additional specific error details when applicable
-          items:
-            type: string
-          example:
-          - Query must be at least 2 characters
-        source:
-          type: string
-          description: Source register that failed, when the failure is attributable to a specific external register
-          example: handelsregister
-        retryable:
-          type: boolean
-          description: Whether retrying the request may eventually succeed
-          example: true
-      required:
-      - code
-      - message
-    OtherKeyPersonRoleEnum:
-      type: string
-      enum:
-      - Board Member
-      - Non-Executive Director
-      - Independent Director
-      - Advisory Board Member
-      - Board Observer
-      - Auditor
-      - Compliance Officer
-      - Data Protection Officer
-      - Money Laundering Reporting Officer
-      - Secretary
-      - Supervisor
-      - Supervisory Board Member
-      - C-Level Executive
-      - Registered Agent
-      - Other
-      description: The standardized role of the individual.
-    FinancialStatementDTO:
-      type: object
-      properties:
-        id:
-          type: string
-        name:
-          type: string
-          description: Document name in the local language of the country where it was issued
-        description:
-          type: string
-          description: Document description in English
-        format:
-          type: string
-        estimatedDeliverySeconds:
-          type: number
-        url:
-          type: string
-        pdfUrl:
-          type: string
-          description: URL to converted PDF version (when original document is XML)
-        blobName:
-          type: string
-        price:
-          type: number
-          description: Fixed price in cents
-        priceMarkup:
-          type: number
-          description: Price markup percentage
-        date:
-          type: string
-        period:
-          $ref: '#/components/schemas/PeriodDTO'
-        extractedFinancialData:
-          description: Extracted financial data from the document (only available after document is downloaded and parsed)
-          allOf:
-          - $ref: '#/components/schemas/ExtractedFinancialDataDTO'
-      required:
-      - id
-      - name
-      - format
-    GraphMetadataDTO:
-      type: object
-      properties:
-        stoppedReason:
-          type: string
-          description: Reason why graph traversal stopped
-          enum:
-          - completed
-          - budget_exhausted
-          - max_depth_reached
-          - max_nodes_reached
-          - timeout
-        amountSpent:
-          type: number
-          description: Total amount spent in credit cents during traversal
-        companiesFetched:
-          type: number
-          description: Number of companies successfully fetched during traversal
-        companiesSkipped:
-          type: number
-          description: Number of companies skipped (due to budget or limits)
-        interactive:
-          type: boolean
-          description: True when the request was run in interactive mode. The traversal fetched only the entry node (root for an initial request, seed for a continuation) and emitted its direct company shareholders as `budget_truncated` chips for follow-up exploration. Continuation requests inherit this flag from the parent and cannot opt out.
-      required:
-      - stoppedReason
-      - amountSpent
-      - companiesFetched
-      - companiesSkipped
-    GetCompanyRequestResultDTO:
-      type: object
-      properties:
-        requestId:
-          type: string
-          example: 123e4567-e89b-12d3-a456-426614174000
-          description: Optional UUID that references a previous request. When provided, returns cached data from that specific request instead of fetching fresh data.
-      required:
-      - requestId
-    GraphSourcesDTO:
-      type: object
-      properties:
-        nodes:
-          type: object
-          description: Per-node provenance, keyed by graph nodeId (graph.nodes[i].nodeId). Today only company nodes that had AI-reconstructed shareholders get an entry. Future per-node provenance types (UBO calculation reasoning, edge sources, etc.) become sibling fields inside each GraphNodeSourcesDTO.
-    ItalyIdentifiers:
-      type: object
-      properties:
-        VAT:
-          type: string
-          description: 'Partita IVA (P.IVA) - VAT registration number. Format: 11 digits (e.g., "02580590541"). Issued by: Agenzia delle Entrate (Revenue Agency)'
-          example: 02580590541
-        Codice Fiscale:
-          type: string
-          description: 'Codice Fiscale - Tax identification code. Format: 16 alphanumeric characters for individuals (e.g., "RSSMRA70A01H501U"), 11 digits for companies (often same as VAT). Issued by: Agenzia delle Entrate (Revenue Agency)'
-          example: RSSMRA70A01H501U
-        CCIAA:
-          type: string
-          description: 'CCIAA - Camera di Commercio (Chamber of Commerce) province code. Format: 2-letter province code (e.g., "TO" for Torino, "MI" for Milano). Indicates which Chamber of Commerce the company is registered with.'
-          example: TO
-        REA Code:
-          type: string
-          description: 'REA Code - Registro Economico Amministrativo (Economic Administrative Register) number. Format: Numeric (e.g., "1234567"). Unique within each CCIAA province. Combined with CCIAA forms a unique identifier.'
-          example: '1234567'
-      description: Identifiers for Italian companies (IT)
-    DataSourcesDTO:
-      type: object
-      properties:
-        company:
-          type: object
-          description: Per-field data sources for company profile fields. Keys are field names, values describe the source.
-        shareholders:
-          description: Sources for the shareholders list. Carries list-level overall (e.g. AI reconstruction summary), limitations the agent flagged, and per-entity sources 1:1 by index with the shareholders array.
-          allOf:
-          - $ref: '#/components/schemas/EntityListSourcesDTO'
-        ultimateBeneficialOwners:
-          description: Sources for the ultimate beneficial owners list. Same shape as shareholders.
-          allOf:
-          - $ref: '#/components/schemas/EntityListSourcesDTO'
-        legalRepresentatives:
-          description: Sources for the legal representatives list. Same shape as shareholders.
-          allOf:
-          - $ref: '#/components/schemas/EntityListSourcesDTO'
-        establishments:
-          description: Sources for the establishments list. Same shape as shareholders.
-          allOf:
-          - $ref: '#/components/schemas/EntityListSourcesDTO'
-        otherKeyPersons:
-          description: Sources for the other key persons list. Same shape as shareholders.
-          allOf:
-          - $ref: '#/components/schemas/EntityListSourcesDTO'
-        graph:
-          description: Sources specific to the ownership graph (per-graph-node provenance). Each company node in the graph that had its shareholders AI-reconstructed carries its own EntityListSourcesDTO under nodes[<nodeId>].shareholders. Distinct from dataSources.shareholders, which is scoped to the result-level shareholders list (the root company only).
-          allOf:
-          - $ref: '#/components/schemas/GraphSourcesDTO'
     CompanyStatusDTO:
       type: object
       properties:
@@ -603,6 +332,156 @@ components:
           - $ref: '#/components/schemas/CompanyStatusDetailsDTO'
       required:
       - localName
+    FinancialRatiosDTO:
+      type: object
+      properties:
+        currentRatio:
+          type: number
+        quickRatio:
+          type: number
+        debtToEquity:
+          type: number
+        netProfitMargin:
+          type: number
+        returnOnEquity:
+          type: number
+        revenueGrowth:
+          type: number
+    RequestMetadataDTO:
+      type: object
+      properties:
+        companyId:
+          type: string
+          example: '932884117'
+          description: The requested company id.
+        countryCode:
+          type: string
+          enum:
+          - AT
+          - BE
+          - BG
+          - CH
+          - CN
+          - CZ
+          - CY
+          - DE
+          - DK
+          - EE
+          - ES
+          - FI
+          - FR
+          - GB
+          - GG
+          - GR
+          - HK
+          - HR
+          - HU
+          - IE
+          - IS
+          - IT
+          - JE
+          - LI
+          - LU
+          - LV
+          - MC
+          - MT
+          - MU
+          - NL
+          - 'NO'
+          - PL
+          - PT
+          - RO
+          - RU
+          - SE
+          - SG
+          - SI
+          - SK
+          - VG
+          example: FR
+          description: The requested country code.
+        requestId:
+          type: string
+          example: request-12345
+          description: The unique identifier for the request.
+        dataPoints:
+          type: array
+          items:
+            type: string
+        documents:
+          type: array
+          items:
+            type: string
+        dataStatus:
+          description: Indicates the status of data points and documents associated with the company. It states if the data has been retrieved, if a job is in progress for asynchronous data, or if a job there was an error.
+          allOf:
+          - $ref: '#/components/schemas/DataStatus'
+        metadata:
+          type: object
+          additionalProperties:
+            type: string
+          description: Arbitrary key-value string pairs provided at request creation time and echoed back in responses and webhooks.
+        enrichmentReport:
+          type: string
+          description: A human-readable summary of the agentic enrichment step, explaining what additional data was found or why enrichment could not provide more details. Only present when agenticEnrichment was requested.
+        companyLegalName:
+          type: string
+          description: The legal name of the company, if known from search results.
+        workspace:
+          type: object
+          description: The workspace associated with this request. Only present if the account uses workspaces.
+      required:
+      - countryCode
+    CompanyActivityItemDTO:
+      type: object
+      properties:
+        code:
+          type: string
+          description: The activity code
+          example: '62.01'
+        description:
+          type: string
+          description: The description of the activity
+          example: Computer programming activities
+        isAIInferred:
+          type: boolean
+          description: Indicates whether the activity code comes from an official source or has been inferred by AI
+          example: true
+      required:
+      - code
+    RoleEnum:
+      type: string
+      enum:
+      - Director
+      - Manager
+      - Employee
+      - Chief Executive Officer
+      - Chief Financial Officer
+      - Chief Operating Officer
+      - President
+      - Vice President
+      - Secretary
+      - Treasurer
+      - Legal Advisor
+      - General Counsel
+      - Partner
+      - Associate
+      - Other
+      - Chairman of the Board
+      - Board Member
+      - Managing Director
+      - Executive Director
+      - Non-Executive Director
+      - General Partner
+      - Managing Partner
+      - Limited Partner
+      - Administrator
+      - Liquidator
+      - Receiver
+      - Owner
+      - Chairman
+      - Auditor
+      - Authorized Signatory
+      description: The standardized role of the individual.
     CompanyDTO:
       type: object
       properties:
@@ -1015,44 +894,109 @@ components:
           - $ref: '#/components/schemas/EmployeeCountDTO'
       required:
       - countryCode
-    EntityListSourcesDTO:
+    EnhancedGraphResultDTO:
       type: object
       properties:
-        overall:
-          description: List-level source. Describes how the entire list was assembled (e.g. AI reconstruction summary covering all shareholders). The analysis field carries the prose; documents lists the supporting documents.
-          allOf:
-          - $ref: '#/components/schemas/DataSourceDTO'
-        limitations:
-          description: Structured list of gaps the AI agent flagged about building this list (e.g. unparseable documents, missing share-pledge agreements).
+        nodes:
+          description: All entities in the ownership structure
           type: array
           items:
-            type: string
-        items:
-          description: Per-entity sources, 1:1 by array index with the corresponding entity array (e.g. shareholders, ultimateBeneficialOwners).
+            $ref: '#/components/schemas/GraphNodeDTO'
+        edges:
+          description: All ownership relationships
           type: array
           items:
-            $ref: '#/components/schemas/EntitySourcesDTO'
-    GraphNodeContinuationDTO:
-      type: object
-      properties:
-        reason:
+            $ref: '#/components/schemas/GraphEdgeDTO'
+        mermaidDiagram:
           type: string
-          description: Why the BFS stopped at this node. `budget` = ran out of credits.
-          enum:
-          - budget
-        estimatedCost:
-          type: number
-          description: 'Estimated cost in credit cents to fetch this company during a continuation. Dedup-aware: already-paid companies show ~0.'
-        accumulatedOwnership:
-          type: number
-          description: Product of edge percentages from the root to this node (0–1). Undefined if any upstream hop lacked a percentage.
-        depth:
-          type: number
-          description: Depth of this node in the graph (root = 0).
+          description: Mermaid diagram representation
+        description:
+          type: string
+          description: Human-readable description of the graph
+        metadata:
+          description: Metadata about the graph traversal process
+          allOf:
+          - $ref: '#/components/schemas/GraphMetadataDTO'
       required:
-      - reason
-      - estimatedCost
-      - depth
+      - nodes
+      - edges
+    OtherKeyPersonRoleEnum:
+      type: string
+      enum:
+      - Board Member
+      - Non-Executive Director
+      - Independent Director
+      - Advisory Board Member
+      - Board Observer
+      - Auditor
+      - Compliance Officer
+      - Data Protection Officer
+      - Money Laundering Reporting Officer
+      - Secretary
+      - Supervisor
+      - Supervisory Board Member
+      - C-Level Executive
+      - Registered Agent
+      - Other
+      description: The standardized role of the individual.
+    OtherKeyPersonRoleDTO:
+      type: object
+      properties:
+        localName:
+          type: string
+          description: The local role name in the local language
+          example: Commissaire aux comptes
+        englishTranslation:
+          type: string
+          description: The role name in English
+          example: Auditor
+        semaphoreStandard:
+          example: Board Member
+          description: The standardized role of the individual.
+          deprecated: true
+          allOf:
+          - $ref: '#/components/schemas/OtherKeyPersonRoleEnum'
+        standardized:
+          example: Board Member
+          description: The standardized role of the individual.
+          allOf:
+          - $ref: '#/components/schemas/OtherKeyPersonRoleEnum'
+      required:
+      - standardized
+    ArticleOfAssociationDTO:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+          description: Document name in the local language of the country where it was issued
+        description:
+          type: string
+          description: Document description in English
+        format:
+          type: string
+        estimatedDeliverySeconds:
+          type: number
+        url:
+          type: string
+        pdfUrl:
+          type: string
+          description: URL to converted PDF version (when original document is XML)
+        blobName:
+          type: string
+        price:
+          type: number
+          description: Fixed price in cents
+        priceMarkup:
+          type: number
+          description: Price markup percentage
+        date:
+          type: string
+      required:
+      - id
+      - name
+      - format
     GraphCompanyDTO:
       type: object
       properties:
@@ -1352,329 +1296,69 @@ components:
       required:
       - legalName
       - countryCode
-    EnhancedGraphResultDTO:
+    ExtractedFinancialDataDTO:
       type: object
       properties:
-        nodes:
-          description: All entities in the ownership structure
-          type: array
-          items:
-            $ref: '#/components/schemas/GraphNodeDTO'
-        edges:
-          description: All ownership relationships
-          type: array
-          items:
-            $ref: '#/components/schemas/GraphEdgeDTO'
-        mermaidDiagram:
+        fiscalYear:
+          type: object
+          description: Fiscal year period covered by the financial statement
+        approvalDate:
           type: string
-          description: Mermaid diagram representation
-        description:
-          type: string
-          description: Human-readable description of the graph
-        metadata:
-          description: Metadata about the graph traversal process
-          allOf:
-          - $ref: '#/components/schemas/GraphMetadataDTO'
-      required:
-      - nodes
-      - edges
-    DataSourceDocumentDTO:
-      type: object
-      properties:
-        name:
-          type: string
-          description: Name of the supporting document
-          example: Statuts constitutifs
-        date:
-          type: string
-          description: Date of the document
-          example: '2020-03-15'
-        reason:
-          type: string
-          description: Brief explanation of why this document is pertinent for the analysis
-          example: Most recent confirmation statement showing 100% ownership by KCA Deutag International 3 Limited
-      required:
-      - name
-    FinancialRatiosDTO:
-      type: object
-      properties:
-        currentRatio:
-          type: number
-        quickRatio:
-          type: number
-        debtToEquity:
-          type: number
-        netProfitMargin:
-          type: number
-        returnOnEquity:
-          type: number
-        revenueGrowth:
-          type: number
-    AddressDTO:
-      type: object
-      properties:
-        addressLine1:
-          type: string
-          description: First line of the address
-          example: 10 rue de la Fraternité
-        addressLine2:
-          type: string
-          description: Second line of the address
-          example: Topograph Building
-        city:
-          type: string
-          description: City of the address
-          example: Bagnolet
-        postalCode:
-          type: string
-          description: Postal code of the address
-          example: '93170'
-        region:
-          type: string
-          description: Region of the address
-          example: FR
-        countryCode:
-          type: string
-          description: Country of the address using ISO 3166-1 alpha-2 country code
-          example: FR
-        poBox:
-          type: string
-          description: Post Office Box number
-          example: PO Box 123
-        careOf:
-          type: string
-          description: Care of (c/o) recipient
-          example: c/o John Doe
-        state:
-          type: string
-          description: State of the address
-          example: Île-de-France
-        latitude:
-          type: number
-          description: Latitude coordinate
-          example: 59.9139
-        longitude:
-          type: number
-          description: Longitude coordinate
-          example: 10.7522
-    FranceIdentifiers:
-      type: object
-      properties:
-        siren:
-          type: string
-          description: 'SIREN - Système d''Identification du Répertoire des Entreprises. Format: 9 digits (e.g., "443061841"). Issued by: INSEE (Institut National de la Statistique et des Études Économiques). This is the primary company identifier in France.'
-          example: '443061841'
-        siret:
-          type: string
-          description: 'SIRET - Système d''Identification du Répertoire des Établissements. Format: 14 digits = SIREN (9) + NIC (5) (e.g., "44306184100047"). Identifies a specific establishment (location) of a company. Issued by: INSEE.'
-          example: '44306184100047'
-        VAT:
-          type: string
-          description: 'TVA Intracommunautaire - French VAT number. Format: FR + 2 check digits + SIREN (e.g., "FR27443061841"). Issued by: Direction Générale des Finances Publiques (DGFiP). Required for EU cross-border transactions.'
-          example: FR27443061841
-        rna:
-          type: string
-          description: 'RNA - Répertoire National des Associations. Format: W + 9 digits (e.g., "W751234567"). Identifies associations registered in mainland France. Issued by: Préfecture.'
-          example: W751234567
-        rnaAlsaceMoselle:
-          type: string
-          description: 'RNA Alsace-Moselle - Special identifier for associations in the Alsace-Moselle region. Format: Letter + year + code + number (e.g., "A2002THI000075"). These associations are registered under local law (droit local).'
-          example: A2002THI000075
-      description: Identifiers for French companies (FR)
-    MonetaryAmountDTO:
-      type: object
-      properties:
-        amount:
-          type: number
-          description: The numeric amount of money.
-          example: 1000
         currency:
           type: string
-          description: The ISO 4217 currency code (e.g., EUR, USD).
-          example: EUR
-        formatted:
-          type: string
-          description: Formatted string representation of the monetary amount in the local format
-          example: 1000.00 €
-      required:
-      - amount
-      - currency
-      - formatted
-    OtherKeyPersonDTO:
-      type: object
-      properties:
-        entityId:
-          type: string
-          description: Unique identifier to track the same person or company across different roles (legal representatives, shareholders, UBOs, etc.). Since data is retrieved from multiple registries, the same entity may appear with slightly different names or details. This ID allows you to identify that "John Smith" as a legal representative is the same person as "J. Smith" listed as a shareholder.
-          example: person_001
-        role:
-          description: The role of the other key person
-          allOf:
-          - $ref: '#/components/schemas/OtherKeyPersonRoleDTO'
-        startDate:
-          type: string
-          description: The start date of the role
-          example: '2022-01-01'
-        endDate:
-          type: string
-          description: The end date of the role (if applicable)
-          example: '2023-12-31'
-        type:
+        accountingStandard:
           type: string
           enum:
-          - individual
-          - company
-          description: The type of the other key person (individual or company)
-          example: individual
-        individual:
-          description: Details if the other key person is an individual
+          - IFRS
+          - French GAAP
+          - US GAAP
+          - Swiss GAAP
+          - Lux GAAP
+          - Other
+        statementType:
+          type: string
+          enum:
+          - consolidated
+          - simplified
+        analysis:
+          description: AI-generated financial analysis and insights
           allOf:
-          - $ref: '#/components/schemas/PhysicalPersonBaseDTO'
-        company:
-          description: Details if the other key person is a company
-          allOf:
-          - $ref: '#/components/schemas/CompanyDTO'
-      required:
-      - type
-    AccountsOverdueFlagDTO:
+          - $ref: '#/components/schemas/FinancialAnalysisDTO'
+        incomeStatement:
+          type: object
+        balanceSheet:
+          type: object
+    GraphNodeFlagsDTO:
       type: object
       properties:
-        active:
+        isRoot:
           type: boolean
-          example: true
-          description: Whether the signal is currently active (the accounts are currently overdue).
-        dueDate:
+          description: True if this is the root/target company being analyzed
+        isUbo:
+          type: boolean
+          description: True if this individual has >25% ownership and qualifies as a UBO (individuals only)
+        isUboProxy:
+          type: boolean
+          description: True if this company is the ultimate controlling entity of the target company (companies only)
+        uboCalculationMethod:
+          type: array
+          description: Methods that qualified this individual as UBO (only when isUbo is true)
+          items:
+            type: string
+            enum:
+            - accumulation
+            - domination
+        status:
           type: string
-          example: '2024-09-30'
-          description: The date the accounts were due (and missed), when the register reports it. ISO 8601 (YYYY-MM-DD).
-        since:
-          type: string
-          example: '2024-10-01'
-          description: The date the flag became active, when the register reports it. ISO 8601 (YYYY-MM-DD).
-        source:
-          type: string
-          example: companies_house
-          description: The register that reported the signal.
-      required:
-      - active
-    DocumentWithUrlDto:
-      type: object
-      properties:
-        id:
-          type: string
-        name:
-          type: string
-          description: Document name in the local language of the country where it was issued
-        description:
-          type: string
-          description: Document description in English
-        format:
-          type: string
-        estimatedDeliverySeconds:
-          type: number
-        url:
-          type: string
-        pdfUrl:
-          type: string
-          description: URL to converted PDF version (when original document is XML)
-        blobName:
-          type: string
-        price:
-          type: number
-          description: Fixed price in cents
-        priceMarkup:
-          type: number
-          description: Price markup percentage
-        date:
-          type: string
-      required:
-      - id
-      - name
-    LegalRepresentativeDTO:
-      type: object
-      properties:
-        entityId:
-          type: string
-          description: Unique identifier to track the same person or company across different roles (legal representatives, shareholders, UBOs, etc.). Since data is retrieved from multiple registries, the same entity may appear with slightly different names or details. This ID allows you to identify that "John Smith" as a legal representative is the same person as "J. Smith" listed as a shareholder.
-          example: person_001
-        role:
-          description: The role of the legal representative
-          allOf:
-          - $ref: '#/components/schemas/RoleDTO'
-        startDate:
-          type: string
-          description: The start date of the legal representative's role
-          example: '2022-01-01'
-        endDate:
-          type: string
-          description: The end date of the legal representative's role (if applicable)
-          example: '2023-12-31'
-        type:
-          type: string
-          description: The type of the legal representative (individual or company)
+          description: Status of the node during graph building. `budget_truncated` marks a frontier company that was not fetched because the request ran out of credits; clients can submit a continuation request to expand it.
           enum:
-          - individual
-          - company
-          example: individual
-        individual:
-          description: Details of the individual legal representative
-          allOf:
-          - $ref: '#/components/schemas/PhysicalPersonBaseDTO'
-        company:
-          description: Details of the company legal representative
-          allOf:
-          - $ref: '#/components/schemas/CompanyDTO'
-        representedBy:
-          description: 'When type is COMPANY: the physical person who represents/acts on behalf of the company (e.g., "représentant permanent" in French)'
-          allOf:
-          - $ref: '#/components/schemas/PhysicalPersonBaseDTO'
-        representationMode:
-          description: 'How this representative can bind the company: sole (can act alone) or joint (must act with others)'
-          allOf:
-          - $ref: '#/components/schemas/RepresentationModeDTO'
-      required:
-      - type
-    ShareholderDTO:
-      type: object
-      properties:
-        entityId:
-          type: string
-          description: Unique identifier to track the same person or company across different roles (legal representatives, shareholders, UBOs, etc.). Since data is retrieved from multiple registries, the same entity may appear with slightly different names or details. This ID allows you to identify that "John Smith" as a legal representative is the same person as "J. Smith" listed as a shareholder.
-          example: person_001
-        type:
-          type: string
-          description: The type of the shareholder (individual or company)
-          enum:
-          - individual
-          - company
-          example: individual
-        individual:
-          description: Details of the individual shareholder
-          allOf:
-          - $ref: '#/components/schemas/PhysicalPersonBaseDTO'
-        company:
-          description: Details of the company shareholder
-          allOf:
-          - $ref: '#/components/schemas/CompanyDTO'
-        sharePercentage:
-          type: number
-          description: The percentage of shares owned by the shareholder
-          example: 25.5
-        numberOfShares:
-          type: number
-          description: The absolute number of shares owned by the shareholder
-          example: 1000
-        nominalCapitalHeld:
-          description: Total nominal (stated) capital value held by this shareholder. This is the face value or par value of all shares owned, calculated as numberOfShares × parValuePerShare. For example, if a shareholder owns 1000 shares with a par value of €10 each, nominalCapitalHeld would be €10,000. This value represents the legal capital contribution recorded in company documents, not the market value or actual amount paid.
-          readOnly: true
-          allOf:
-          - $ref: '#/components/schemas/MonetaryAmountDTO'
-        paidInAmount:
-          description: Total actual amount paid by the shareholder for their shares, including any share premium over the nominal/par value. This represents the real money invested. For example, if shares with €10,000 nominal value were purchased for €15,000, the paidInAmount would be €15,000. In Italy this corresponds to "valore versato", in Germany to "eingezahltes Kapital". This field captures the actual capital contribution to the company.
-          allOf:
-          - $ref: '#/components/schemas/MonetaryAmountDTO'
-      required:
-      - type
+          - pending
+          - found
+          - not_found
+          - error
+          - search_resolved
+          - placeholder
+          - budget_truncated
     GraphIndividualDTO:
       type: object
       properties:
@@ -1973,101 +1657,164 @@ components:
           - TEST
       required:
       - name
-    EmployeeCountDTO:
+    CompanyStatusDetailsDTO:
       type: object
       properties:
-        exact:
+        status:
+          type: string
+          enum:
+          - ACTIVE
+          - UNDER_INSOLVENCY_PROCEEDING
+          - INACTIVE_NOT_CLOSED
+          - PENDING_DISSOLUTION
+          - CLOSED
+          - UNKNOWN
+          example: ACTIVE
+          description: The standardized status of the company
+        closureReason:
+          type: string
+          enum:
+          - BANKRUPTCY
+          - LIQUIDATION
+          - MERGER
+          - ACQUISITION
+          - VOLUNTARY_DISSOLUTION
+          - ADMINISTRATIVE_DISSOLUTION
+          - COURT_ORDER
+          - SPLIT
+          - OTHER
+          - UNKNOWN
+          example: BANKRUPTCY
+          description: The reason for company closure, if applicable
+        closureDate:
+          type: string
+          example: '2024-01-15'
+          description: The date when the company was closed, if applicable
+        insolvencyStartDate:
+          type: string
+          example: '2023-12-01'
+          description: The date when insolvency proceedings started, if applicable
+        additionalInfo:
+          type: string
+          example: Company entered voluntary liquidation due to retirement of owner
+          description: Additional information about the status
+      required:
+      - status
+    CountryIdentifiersDTO:
+      type: object
+      properties:
+        VAT:
+          type: string
+          description: 'Partita IVA (P.IVA) - VAT registration number. Format: 11 digits (e.g., "02580590541"). Issued by: Agenzia delle Entrate (Revenue Agency)'
+          example: 02580590541
+        Codice Fiscale:
+          type: string
+          description: 'Codice Fiscale - Tax identification code. Format: 16 alphanumeric characters for individuals (e.g., "RSSMRA70A01H501U"), 11 digits for companies (often same as VAT). Issued by: Agenzia delle Entrate (Revenue Agency)'
+          example: RSSMRA70A01H501U
+        CCIAA:
+          type: string
+          description: 'CCIAA - Camera di Commercio (Chamber of Commerce) province code. Format: 2-letter province code (e.g., "TO" for Torino, "MI" for Milano). Indicates which Chamber of Commerce the company is registered with.'
+          example: TO
+        REA Code:
+          type: string
+          description: 'REA Code - Registro Economico Amministrativo (Economic Administrative Register) number. Format: Numeric (e.g., "1234567"). Unique within each CCIAA province. Combined with CCIAA forms a unique identifier.'
+          example: '1234567'
+    RangeDto:
+      type: object
+      properties:
+        lower:
           type: number
-          example: 150
-          description: The exact number of employees, if known
-        min:
+          description: Lower bound of the range
+          example: 25
+        upper:
           type: number
-          example: 100
-          description: The minimum number of employees in a range
-        max:
-          type: number
-          example: 200
-          description: The maximum number of employees in a range
-        lastUpdated:
+          description: Upper bound of the range
+          example: 50
+      required:
+      - lower
+      - upper
+    EntityListSourcesDTO:
+      type: object
+      properties:
+        overall:
+          description: List-level source. Describes how the entire list was assembled (e.g. AI reconstruction summary covering all shareholders). The analysis field carries the prose; documents lists the supporting documents.
+          allOf:
+          - $ref: '#/components/schemas/DataSourceDTO'
+        limitations:
+          description: Structured list of gaps the AI agent flagged about building this list (e.g. unparseable documents, missing share-pledge agreements).
+          type: array
+          items:
+            type: string
+        items:
+          description: Per-entity sources, 1:1 by array index with the corresponding entity array (e.g. shareholders, ultimateBeneficialOwners).
+          type: array
+          items:
+            $ref: '#/components/schemas/EntitySourcesDTO'
+    AnnualFilingOverdueFlagDTO:
+      type: object
+      properties:
+        active:
+          type: boolean
+          example: true
+          description: Whether the signal is currently active (the annual filing is currently overdue).
+        dueDate:
+          type: string
+          example: '2024-03-01'
+          description: The date the filing was due (and missed), when the register reports it. ISO 8601 (YYYY-MM-DD).
+        since:
           type: string
           example: '2024-03-15'
-          description: The date when the employee count was last updated
-        isEstimate:
-          type: boolean
-          example: false
-          description: Indicates if the employee count is an estimate
-    BirthDateDTO:
-      type: object
-      properties:
-        day:
-          type: number
-          description: Day of birth (1-31)
-          example: 15
-        month:
-          type: number
-          description: Month of birth (1-12), where January is 1
-          example: 7
-        year:
-          type: number
-          description: Year of birth
-          example: 1980
-    RoleDTO:
-      type: object
-      properties:
-        localName:
+          description: The date the flag became active, when the register reports it. ISO 8601 (YYYY-MM-DD).
+        source:
           type: string
-          description: The local role name in the local language
-          example: Directeur
-        englishTranslation:
-          type: string
-          description: The role name in English
-          example: Director
-        iso5009Code:
-          type: string
-          description: The ISO 5009 role code
-          example: GIDXNF
-        semaphoreStandard:
-          example: Director
-          description: The standardized role of the individual.
-          deprecated: true
-          allOf:
-          - $ref: '#/components/schemas/RoleEnum'
-        standardized:
-          example: Director
-          description: The standardized role of the individual.
-          allOf:
-          - $ref: '#/components/schemas/RoleEnum'
+          example: companies_house
+          description: The register that reported the signal.
       required:
-      - standardized
-    LegalFormDTO:
+      - active
+    LegalRepresentativeDTO:
       type: object
       properties:
-        localName:
+        entityId:
           type: string
-          example: EURL, entreprise unipersonnelle à responsabilité limitée
-          description: The local legal form of the company, in the local language
-        englishTranslation:
-          type: string
-          example: Single Member Limited Liability Company
-          description: The English translation of the local legal form.
-        semaphoreStandard:
-          example: Limited Liability Company
-          description: The standardized legal form of the company.
-          deprecated: true
+          description: Unique identifier to track the same person or company across different roles (legal representatives, shareholders, UBOs, etc.). Since data is retrieved from multiple registries, the same entity may appear with slightly different names or details. This ID allows you to identify that "John Smith" as a legal representative is the same person as "J. Smith" listed as a shareholder.
+          example: person_001
+        role:
+          description: The role of the legal representative
           allOf:
-          - $ref: '#/components/schemas/LegalFormEnum'
-        standardized:
-          example: Limited Liability Company
-          description: The standardized legal form of the company.
-          allOf:
-          - $ref: '#/components/schemas/LegalFormEnum'
-        iso20275Code:
+          - $ref: '#/components/schemas/RoleDTO'
+        startDate:
           type: string
-          example: F8DD
-          description: The ISO 20275 Entity Legal Form code for the company.
-        isAIEnriched:
-          type: boolean
-          description: True when englishTranslation, standardized, and iso20275Code were AI-inferred rather than sourced directly from the registry.
+          description: The start date of the legal representative's role
+          example: '2022-01-01'
+        endDate:
+          type: string
+          description: The end date of the legal representative's role (if applicable)
+          example: '2023-12-31'
+        type:
+          type: string
+          description: The type of the legal representative (individual or company)
+          enum:
+          - individual
+          - company
+          example: individual
+        individual:
+          description: Details of the individual legal representative
+          allOf:
+          - $ref: '#/components/schemas/PhysicalPersonBaseDTO'
+        company:
+          description: Details of the company legal representative
+          allOf:
+          - $ref: '#/components/schemas/CompanyDTO'
+        representedBy:
+          description: 'When type is COMPANY: the physical person who represents/acts on behalf of the company (e.g., "représentant permanent" in French)'
+          allOf:
+          - $ref: '#/components/schemas/PhysicalPersonBaseDTO'
+        representationMode:
+          description: 'How this representative can bind the company: sole (can act alone) or joint (must act with others)'
+          allOf:
+          - $ref: '#/components/schemas/RepresentationModeDTO'
+      required:
+      - type
     CreateCompanyRequestDTO:
       type: object
       properties:
@@ -2197,78 +1944,37 @@ components:
       required:
       - id
       - countryCode
-    PercentageDetailDto:
+    FranceIdentifiers:
       type: object
       properties:
-        type:
+        siren:
           type: string
-          description: Type of percentage detail (shares, voting rights)
-          enum:
-          - shares
-          - voting-rights
-          example: shares
-        percentageRange:
-          description: Range of control as a lower and upper bound
-          example:
-            lower: 25
-            upper: 50
-          allOf:
-          - $ref: '#/components/schemas/RangeDto'
-        percentageValue:
-          type: number
-          description: Exact percentage of control
-          example: 30
-        monetaryAmount:
-          description: Monetary amount of shares controlled
-          allOf:
-          - $ref: '#/components/schemas/MonetaryAmountDTO'
-        numberOfShares:
-          type: number
-          description: Number of shares controlled
-          example: 1000
-        nature:
+          description: 'SIREN - Système d''Identification du Répertoire des Entreprises. Format: 9 digits (e.g., "443061841"). Issued by: INSEE (Institut National de la Statistique et des Études Économiques). This is the primary company identifier in France.'
+          example: '443061841'
+        siret:
           type: string
-          description: Indicates whether the control is direct or indirect
-          enum:
-          - direct
-          - indirect
-          example: direct
-      required:
-      - type
-    GraphNodeDTO:
+          description: 'SIRET - Système d''Identification du Répertoire des Établissements. Format: 14 digits = SIREN (9) + NIC (5) (e.g., "44306184100047"). Identifies a specific establishment (location) of a company. Issued by: INSEE.'
+          example: '44306184100047'
+        VAT:
+          type: string
+          description: 'TVA Intracommunautaire - French VAT number. Format: FR + 2 check digits + SIREN (e.g., "FR27443061841"). Issued by: Direction Générale des Finances Publiques (DGFiP). Required for EU cross-border transactions.'
+          example: FR27443061841
+        rna:
+          type: string
+          description: 'RNA - Répertoire National des Associations. Format: W + 9 digits (e.g., "W751234567"). Identifies associations registered in mainland France. Issued by: Préfecture.'
+          example: W751234567
+        rnaAlsaceMoselle:
+          type: string
+          description: 'RNA Alsace-Moselle - Special identifier for associations in the Alsace-Moselle region. Format: Letter + year + code + number (e.g., "A2002THI000075"). These associations are registered under local law (droit local).'
+          example: A2002THI000075
+      description: Identifiers for French companies (FR)
+    PeriodDTO:
       type: object
       properties:
-        nodeId:
-          type: string
-          description: A unique identifier for the node in the graph (for graph traversal)
-        type:
-          type: string
-          description: Whether this is an individual person or a company
-          enum:
-          - individual
-          - company
-        individual:
-          description: Individual person data (only populated when type is individual)
-          allOf:
-          - $ref: '#/components/schemas/GraphIndividualDTO'
-        company:
-          description: Company data (only populated when type is company)
-          allOf:
-          - $ref: '#/components/schemas/GraphCompanyDTO'
-        totalOwnershipPercentage:
-          type: number
-          description: The total calculated ownership percentage of the root company (0-100)
-        flags:
-          description: Flags indicating special properties of this node
-          allOf:
-          - $ref: '#/components/schemas/GraphNodeFlagsDTO'
-        continuation:
-          description: Continuation metadata — present only on `budget_truncated` nodes.
-          allOf:
-          - $ref: '#/components/schemas/GraphNodeContinuationDTO'
-      required:
-      - nodeId
-      - type
+        startDate:
+          $ref: '#/components/schemas/PeriodDateDTO'
+        endDate:
+          $ref: '#/components/schemas/PeriodDateDTO'
     UltimateBeneficialOwnerDTO:
       type: object
       properties:
@@ -2338,92 +2044,148 @@ components:
           - $ref: '#/components/schemas/ControlDTO'
       required:
       - control
-    RoleEnum:
-      type: string
-      enum:
-      - Director
-      - Manager
-      - Employee
-      - Chief Executive Officer
-      - Chief Financial Officer
-      - Chief Operating Officer
-      - President
-      - Vice President
-      - Secretary
-      - Treasurer
-      - Legal Advisor
-      - General Counsel
-      - Partner
-      - Associate
-      - Other
-      - Chairman of the Board
-      - Board Member
-      - Managing Director
-      - Executive Director
-      - Non-Executive Director
-      - General Partner
-      - Managing Partner
-      - Limited Partner
-      - Administrator
-      - Liquidator
-      - Receiver
-      - Owner
-      - Chairman
-      - Auditor
-      - Authorized Signatory
-      description: The standardized role of the individual.
-    GraphEdgeDTO:
+    GraphSourcesDTO:
       type: object
       properties:
-        id:
-          type: string
-          description: Unique identifier for the edge
-        fromId:
-          type: string
-          description: ID of the company being owned
-        toId:
-          type: string
-          description: ID of the entity that owns shares (shareholder)
-        percentage:
-          type: number
-          description: Ownership percentage (0-100)
-        source:
-          type: string
-          description: Source information about where this relationship was found
-      required:
-      - id
-      - fromId
-      - toId
-    CompanyActivityItemDTO:
-      type: object
-      properties:
-        code:
-          type: string
-          description: The activity code
-          example: '62.01'
-        description:
-          type: string
-          description: The description of the activity
-          example: Computer programming activities
-        isAIInferred:
-          type: boolean
-          description: Indicates whether the activity code comes from an official source or has been inferred by AI
-          example: true
-      required:
-      - code
-    EntitySourcesDTO:
-      type: object
-      properties:
-        entityId:
-          type: string
-          description: Stable entity identifier matching the underlying entity (e.g. ShareholderDTO.entityId, GraphNodeDTO.nodeId for individuals). Lets consumers look up sources by entity rather than relying on positional alignment.
-        fields:
+        nodes:
           type: object
-          description: Per-field data sources, keyed by field name.
-        overall:
-          description: Holistic source for this entity (e.g. an AI agent narrative explaining how this shareholder was traced). Distinct from per-field sources, which describe each individual datapoint.
+          description: Per-node provenance, keyed by graph nodeId (graph.nodes[i].nodeId). Today only company nodes that had AI-reconstructed shareholders get an entry. Future per-node provenance types (UBO calculation reasoning, edge sources, etc.) become sibling fields inside each GraphNodeSourcesDTO.
+    ComplianceFlagsDTO:
+      type: object
+      properties:
+        accountsOverdue:
+          description: Present when the company’s statutory annual accounts are overdue with the register.
           allOf:
-          - $ref: '#/components/schemas/DataSourceDTO'
+          - $ref: '#/components/schemas/AccountsOverdueFlagDTO'
+        annualFilingOverdue:
+          description: Present when the company’s periodic confirmation/annual filing is overdue with the register (in the UK, the Companies House confirmation statement).
+          allOf:
+          - $ref: '#/components/schemas/AnnualFilingOverdueFlagDTO'
+    RoleDTO:
+      type: object
+      properties:
+        localName:
+          type: string
+          description: The local role name in the local language
+          example: Directeur
+        englishTranslation:
+          type: string
+          description: The role name in English
+          example: Director
+        iso5009Code:
+          type: string
+          description: The ISO 5009 role code
+          example: GIDXNF
+        semaphoreStandard:
+          example: Director
+          description: The standardized role of the individual.
+          deprecated: true
+          allOf:
+          - $ref: '#/components/schemas/RoleEnum'
+        standardized:
+          example: Director
+          description: The standardized role of the individual.
+          allOf:
+          - $ref: '#/components/schemas/RoleEnum'
+      required:
+      - standardized
+    EmployeeCountDTO:
+      type: object
+      properties:
+        exact:
+          type: number
+          example: 150
+          description: The exact number of employees, if known
+        min:
+          type: number
+          example: 100
+          description: The minimum number of employees in a range
+        max:
+          type: number
+          example: 200
+          description: The maximum number of employees in a range
+        lastUpdated:
+          type: string
+          example: '2024-03-15'
+          description: The date when the employee count was last updated
+        isEstimate:
+          type: boolean
+          example: false
+          description: Indicates if the employee count is an estimate
+    BirthDateDTO:
+      type: object
+      properties:
+        day:
+          type: number
+          description: Day of birth (1-31)
+          example: 15
+        month:
+          type: number
+          description: Month of birth (1-12), where January is 1
+          example: 7
+        year:
+          type: number
+          description: Year of birth
+          example: 1980
+    DataSourcesDTO:
+      type: object
+      properties:
+        company:
+          type: object
+          description: Per-field data sources for company profile fields. Keys are field names, values describe the source.
+        shareholders:
+          description: Sources for the shareholders list. Carries list-level overall (e.g. AI reconstruction summary), limitations the agent flagged, and per-entity sources 1:1 by index with the shareholders array.
+          allOf:
+          - $ref: '#/components/schemas/EntityListSourcesDTO'
+        ultimateBeneficialOwners:
+          description: Sources for the ultimate beneficial owners list. Same shape as shareholders.
+          allOf:
+          - $ref: '#/components/schemas/EntityListSourcesDTO'
+        legalRepresentatives:
+          description: Sources for the legal representatives list. Same shape as shareholders.
+          allOf:
+          - $ref: '#/components/schemas/EntityListSourcesDTO'
+        establishments:
+          description: Sources for the establishments list. Same shape as shareholders.
+          allOf:
+          - $ref: '#/components/schemas/EntityListSourcesDTO'
+        otherKeyPersons:
+          description: Sources for the other key persons list. Same shape as shareholders.
+          allOf:
+          - $ref: '#/components/schemas/EntityListSourcesDTO'
+        graph:
+          description: Sources specific to the ownership graph (per-graph-node provenance). Each company node in the graph that had its shareholders AI-reconstructed carries its own EntityListSourcesDTO under nodes[<nodeId>].shareholders. Distinct from dataSources.shareholders, which is scoped to the result-level shareholders list (the root company only).
+          allOf:
+          - $ref: '#/components/schemas/GraphSourcesDTO'
+    GraphMetadataDTO:
+      type: object
+      properties:
+        stoppedReason:
+          type: string
+          description: Reason why graph traversal stopped
+          enum:
+          - completed
+          - budget_exhausted
+          - max_depth_reached
+          - max_nodes_reached
+          - timeout
+        amountSpent:
+          type: number
+          description: Total amount spent in credit cents during traversal
+        companiesFetched:
+          type: number
+          description: Number of companies successfully fetched during traversal
+        companiesSkipped:
+          type: number
+          description: Number of companies skipped (due to budget or limits)
+        interactive:
+          type: boolean
+          description: True when the request was run in interactive mode. The traversal fetched only the entry node (root for an initial request, seed for a continuation) and emitted its direct company shareholders as `budget_truncated` chips for follow-up exploration. Continuation requests inherit this flag from the parent and cannot opt out.
+      required:
+      - stoppedReason
+      - amountSpent
+      - companiesFetched
+      - companiesSkipped
     FinancialTrendsDTO:
       type: object
       properties:
@@ -2452,17 +2214,304 @@ components:
       - revenueDirection
       - profitabilityDirection
       - debtDirection
-    ComplianceFlagsDTO:
+    GraphNodeDTO:
       type: object
       properties:
-        accountsOverdue:
-          description: Present when the company’s statutory annual accounts are overdue with the register.
+        nodeId:
+          type: string
+          description: A unique identifier for the node in the graph (for graph traversal)
+        type:
+          type: string
+          description: Whether this is an individual person or a company
+          enum:
+          - individual
+          - company
+        individual:
+          description: Individual person data (only populated when type is individual)
           allOf:
-          - $ref: '#/components/schemas/AccountsOverdueFlagDTO'
-        annualFilingOverdue:
-          description: Present when the company’s periodic confirmation/annual filing is overdue with the register (in the UK, the Companies House confirmation statement).
+          - $ref: '#/components/schemas/GraphIndividualDTO'
+        company:
+          description: Company data (only populated when type is company)
           allOf:
-          - $ref: '#/components/schemas/AnnualFilingOverdueFlagDTO'
+          - $ref: '#/components/schemas/GraphCompanyDTO'
+        totalOwnershipPercentage:
+          type: number
+          description: The total calculated ownership percentage of the root company (0-100)
+        flags:
+          description: Flags indicating special properties of this node
+          allOf:
+          - $ref: '#/components/schemas/GraphNodeFlagsDTO'
+        continuation:
+          description: Continuation metadata — present only on `budget_truncated` nodes.
+          allOf:
+          - $ref: '#/components/schemas/GraphNodeContinuationDTO'
+      required:
+      - nodeId
+      - type
+    LegalFormDTO:
+      type: object
+      properties:
+        localName:
+          type: string
+          example: EURL, entreprise unipersonnelle à responsabilité limitée
+          description: The local legal form of the company, in the local language
+        englishTranslation:
+          type: string
+          example: Single Member Limited Liability Company
+          description: The English translation of the local legal form.
+        semaphoreStandard:
+          example: Limited Liability Company
+          description: The standardized legal form of the company.
+          deprecated: true
+          allOf:
+          - $ref: '#/components/schemas/LegalFormEnum'
+        standardized:
+          example: Limited Liability Company
+          description: The standardized legal form of the company.
+          allOf:
+          - $ref: '#/components/schemas/LegalFormEnum'
+        iso20275Code:
+          type: string
+          example: F8DD
+          description: The ISO 20275 Entity Legal Form code for the company.
+        isAIEnriched:
+          type: boolean
+          description: True when englishTranslation, standardized, and iso20275Code were AI-inferred rather than sourced directly from the registry.
+    TaxIdVerificationDTO:
+      type: object
+      properties:
+        status:
+          type: string
+          enum:
+          - verified
+          - unverified
+          - unavailable
+          description: Verification status of the tax ID
+          example: verified
+        verifiedAt:
+          type: string
+          description: ISO date when the tax ID was verified
+          example: '2024-01-15T10:30:00Z'
+        verifiedName:
+          type: string
+          description: Company name returned by the validation service (e.g., VIES)
+          example: TOPOGRAPH SAS
+        verifiedAddress:
+          type: string
+          description: Address returned by the validation service (e.g., VIES)
+          example: 123 RUE DE PARIS, 75001 PARIS
+        consultationNumber:
+          type: string
+          description: VIES consultation number (requestIdentifier) - the legal proof of validation for audit purposes
+          example: WAPIAAAAW1234567890
+      required:
+      - status
+    SubsidiaryDTO:
+      type: object
+      properties:
+        entityId:
+          type: string
+          description: Unique identifier to track the same company across different roles (subsidiaries, shareholders, etc.). Since data is retrieved from multiple registries, the same entity may appear with slightly different names or details. This ID lets you correlate a subsidiary with its appearance elsewhere in the response.
+          example: company_001
+        company:
+          description: The company in which the queried company holds equity. Always present — a subsidiary is, by definition, a company.
+          allOf:
+          - $ref: '#/components/schemas/CompanyDTO'
+        sharePercentage:
+          type: number
+          description: Direct equity stake in the subsidiary, as a percentage (0–100). For Italian register data this maps to "percentuale-capitale" on the diritti-partecipazione element.
+          example: 75
+        totalSharePercentage:
+          type: number
+          description: Total equity stake including ownership held indirectly through other entities in the chain. Populated only when the source can compute consolidated ownership (e.g. financial statements). Sources that only carry direct stakes leave this undefined.
+          example: 80
+        votingRightsPercentage:
+          type: number
+          description: Voting-rights percentage in the subsidiary. May differ from sharePercentage when non-voting shares exist (preferred shares, dual-class structures). Populated when the source distinguishes equity from voting power.
+          example: 75
+        numberOfShares:
+          type: number
+          description: Absolute number of shares held in the subsidiary.
+          example: 1000
+        nominalCapitalHeld:
+          description: Total nominal (stated) capital value of the equity held in the subsidiary. Face value × number of shares. Equivalent to "valore nominale × n-azioni" in Italian InfoCamere data.
+          allOf:
+          - $ref: '#/components/schemas/MonetaryAmountDTO'
+        paidInAmount:
+          description: Total amount actually paid for the equity held, including any premium over nominal value. Italian "valore versato".
+          allOf:
+          - $ref: '#/components/schemas/MonetaryAmountDTO'
+        acquisitionDate:
+          type: string
+          description: 'Date the equity stake was acquired (ISO 8601: YYYY-MM-DD). Sourced from register filings — for Italian InfoCamere this is the earliest dt-evento on the participation record.'
+          example: '2020-06-15'
+        endDate:
+          type: string
+          description: 'Date the equity stake ended (sale, dissolution of the subsidiary, etc.). When present, the participation is historical rather than current. ISO 8601: YYYY-MM-DD.'
+          example: '2024-03-15'
+      required:
+      - company
+    EntitySourcesDTO:
+      type: object
+      properties:
+        entityId:
+          type: string
+          description: Stable entity identifier matching the underlying entity (e.g. ShareholderDTO.entityId, GraphNodeDTO.nodeId for individuals). Lets consumers look up sources by entity rather than relying on positional alignment.
+        fields:
+          type: object
+          description: Per-field data sources, keyed by field name.
+        overall:
+          description: Holistic source for this entity (e.g. an AI agent narrative explaining how this shareholder was traced). Distinct from per-field sources, which describe each individual datapoint.
+          allOf:
+          - $ref: '#/components/schemas/DataSourceDTO'
+    TaxIdDTO:
+      type: object
+      properties:
+        type:
+          type: string
+          description: Tax ID type (Stripe-aligned)
+          example: eu_vat
+        value:
+          type: string
+          description: Tax ID value WITHOUT country prefix
+          example: '27443061841'
+        country:
+          type: string
+          description: ISO2 country code
+          example: FR
+        verification:
+          description: Verification details for the tax ID
+          allOf:
+          - $ref: '#/components/schemas/TaxIdVerificationDTO'
+      required:
+      - type
+      - value
+      - country
+    GraphNodeContinuationDTO:
+      type: object
+      properties:
+        reason:
+          type: string
+          description: Why the BFS stopped at this node. `budget` = ran out of credits.
+          enum:
+          - budget
+        estimatedCost:
+          type: number
+          description: 'Estimated cost in credit cents to fetch this company during a continuation. Dedup-aware: already-paid companies show ~0.'
+        accumulatedOwnership:
+          type: number
+          description: Product of edge percentages from the root to this node (0–1). Undefined if any upstream hop lacked a percentage.
+        depth:
+          type: number
+          description: Depth of this node in the graph (root = 0).
+      required:
+      - reason
+      - estimatedCost
+      - depth
+    FinancialInsightDTO:
+      type: object
+      properties:
+        category:
+          type: string
+          enum:
+          - liquidity
+          - profitability
+          - solvency
+          - efficiency
+          - growth
+          - risk
+        title:
+          type: string
+        description:
+          type: string
+        riskLevel:
+          type: string
+          enum:
+          - low
+          - medium
+          - high
+          - critical
+        metricValue:
+          type: string
+        recommendation:
+          type: string
+      required:
+      - category
+      - title
+      - description
+      - riskLevel
+    RepresentationModeDTO:
+      type: object
+      properties:
+        mode:
+          type: string
+          description: Whether this representative can act alone (sole) or must act jointly with others (joint)
+          enum:
+          - sole
+          - joint
+          example: sole
+        minimumSignatories:
+          type: number
+          description: Minimum number of signatories required for joint representation (e.g. 2 for "Kollektivzeichnung zu zweien")
+          example: 2
+        namedCoSigners:
+          description: Named co-signers this person must act with for joint representation
+          example:
+          - Kázsmér János
+          type: array
+          items:
+            type: string
+      required:
+      - mode
+    AccountsOverdueFlagDTO:
+      type: object
+      properties:
+        active:
+          type: boolean
+          example: true
+          description: Whether the signal is currently active (the accounts are currently overdue).
+        dueDate:
+          type: string
+          example: '2024-09-30'
+          description: The date the accounts were due (and missed), when the register reports it. ISO 8601 (YYYY-MM-DD).
+        since:
+          type: string
+          example: '2024-10-01'
+          description: The date the flag became active, when the register reports it. ISO 8601 (YYYY-MM-DD).
+        source:
+          type: string
+          example: companies_house
+          description: The register that reported the signal.
+      required:
+      - active
+    DataSourceDTO:
+      type: object
+      properties:
+        type:
+          type: string
+          description: 'How the data was obtained: live_from_registry (fresh API call), cached_from_registry (database copy), inferred (simple derivation from registry data), ai_analysis (complex AI analysis from documents), private_source (paid data)'
+          enum:
+          - live_from_registry
+          - cached_from_registry
+          - inferred
+          - ai_analysis
+          - private_source
+          example: live_from_registry
+        register:
+          type: string
+          description: Machine-readable register code. Omitted for inferred and ai_analysis types.
+          example: inpi
+        documents:
+          description: Supporting documents (for ai_analysis type)
+          type: array
+          items:
+            $ref: '#/components/schemas/DataSourceDocumentDTO'
+        analysis:
+          type: string
+          description: AI reasoning summary explaining how the data was derived (for ai_analysis type)
+          example: Inferred from 2021 confirmation statement showing 100% ownership by KCA Deutag International 3 Limited
+      required:
+      - type
     DocumentsDTO:
       type: object
       properties:
@@ -2500,117 +2549,238 @@ components:
             $ref: '#/components/schemas/DocumentWithUrlDto'
         lastFiscalYearFinancialStatement:
           $ref: '#/components/schemas/DocumentWithUrlDto'
-    GraphNodeFlagsDTO:
+    EstablishmentDTO:
       type: object
       properties:
-        isRoot:
+        id:
+          type: string
+          description: Unique identifier for the establishment
+          example: EST-001
+        name:
+          type: string
+          description: The name of the establishment
+          example: Main Office
+        creationDate:
+          type: string
+          description: The creation date of the establishment
+          example: '2020-01-15'
+        endDate:
+          type: string
+          description: The closing date of the establishment (if applicable)
+          example: '2023-12-31'
+        active:
           type: boolean
-          description: True if this is the root/target company being analyzed
-        isUbo:
-          type: boolean
-          description: True if this individual has >25% ownership and qualifies as a UBO (individuals only)
-        isUboProxy:
-          type: boolean
-          description: True if this company is the ultimate controlling entity of the target company (companies only)
-        uboCalculationMethod:
+          description: Whether the establishment is currently active
+          example: true
+        address:
+          description: The address of the establishment
+          allOf:
+          - $ref: '#/components/schemas/AddressDTO'
+        activities:
+          type: object
+          description: A dictionary of activity classifications for this establishment. In multi-establishment countries (e.g. France, Belgium) each site can carry its own activity codes, which may differ from the company-level activity.
+          example:
+            NACE:
+            - code: '62.01'
+              description: Computer programming activities
+            ISIC:
+            - code: J620
+              description: Computer programming, consultancy and related activities
+          additionalProperties:
+            type: array
+            items:
+              $ref: '#/components/schemas/CompanyActivityItemDTO'
+      required:
+      - name
+    DataSourceDocumentDTO:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Name of the supporting document
+          example: Statuts constitutifs
+        date:
+          type: string
+          description: Date of the document
+          example: '2020-03-15'
+        reason:
+          type: string
+          description: Brief explanation of why this document is pertinent for the analysis
+          example: Most recent confirmation statement showing 100% ownership by KCA Deutag International 3 Limited
+      required:
+      - name
+    DataStatus:
+      type: object
+      properties:
+        dataPoints:
+          type: object
+          description: Retrieval status of data points
+          additionalProperties:
+            oneOf:
+            - $ref: '#/components/schemas/DataPointStatusSucceeded'
+            - $ref: '#/components/schemas/DataPointStatusInProgress'
+            - $ref: '#/components/schemas/DataPointStatusEnriching'
+            - $ref: '#/components/schemas/DataPointStatusFailed'
+            discriminator:
+              propertyName: status
+              mapping:
+                succeeded: '#/components/schemas/DataPointStatusSucceeded'
+                in_progress: '#/components/schemas/DataPointStatusInProgress'
+                enriching: '#/components/schemas/DataPointStatusEnriching'
+                failed: '#/components/schemas/DataPointStatusFailed'
+        documents:
+          type: object
+          description: Retrieval status of documents
+          additionalProperties:
+            oneOf:
+            - $ref: '#/components/schemas/DataPointStatusSucceeded'
+            - $ref: '#/components/schemas/DataPointStatusInProgress'
+            - $ref: '#/components/schemas/DataPointStatusEnriching'
+            - $ref: '#/components/schemas/DataPointStatusFailed'
+            discriminator:
+              propertyName: status
+              mapping:
+                succeeded: '#/components/schemas/DataPointStatusSucceeded'
+                in_progress: '#/components/schemas/DataPointStatusInProgress'
+                enriching: '#/components/schemas/DataPointStatusEnriching'
+                failed: '#/components/schemas/DataPointStatusFailed'
+      required:
+      - dataPoints
+      - documents
+    GraphEdgeDTO:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the edge
+        fromId:
+          type: string
+          description: ID of the company being owned
+        toId:
+          type: string
+          description: ID of the entity that owns shares (shareholder)
+        percentage:
+          type: number
+          description: Ownership percentage (0-100)
+        source:
+          type: string
+          description: Source information about where this relationship was found
+      required:
+      - id
+      - fromId
+      - toId
+    LegalFormEnum:
+      type: string
+      enum:
+      - Sole Proprietorship
+      - Partnership
+      - Limited Liability Company
+      - Corporation
+      - Nonprofit Organization
+      - Cooperative
+      - Government-Owned Entity
+      - Branch or Representative Office
+      - Trust
+      - Other
+      description: The standardized legal form of the company.
+    ShareholderDTO:
+      type: object
+      properties:
+        entityId:
+          type: string
+          description: Unique identifier to track the same person or company across different roles (legal representatives, shareholders, UBOs, etc.). Since data is retrieved from multiple registries, the same entity may appear with slightly different names or details. This ID allows you to identify that "John Smith" as a legal representative is the same person as "J. Smith" listed as a shareholder.
+          example: person_001
+        type:
+          type: string
+          description: The type of the shareholder (individual or company)
+          enum:
+          - individual
+          - company
+          example: individual
+        individual:
+          description: Details of the individual shareholder
+          allOf:
+          - $ref: '#/components/schemas/PhysicalPersonBaseDTO'
+        company:
+          description: Details of the company shareholder
+          allOf:
+          - $ref: '#/components/schemas/CompanyDTO'
+        sharePercentage:
+          type: number
+          description: The percentage of shares owned by the shareholder
+          example: 25.5
+        numberOfShares:
+          type: number
+          description: The absolute number of shares owned by the shareholder
+          example: 1000
+        nominalCapitalHeld:
+          description: Total nominal (stated) capital value held by this shareholder. This is the face value or par value of all shares owned, calculated as numberOfShares × parValuePerShare. For example, if a shareholder owns 1000 shares with a par value of €10 each, nominalCapitalHeld would be €10,000. This value represents the legal capital contribution recorded in company documents, not the market value or actual amount paid.
+          readOnly: true
+          allOf:
+          - $ref: '#/components/schemas/MonetaryAmountDTO'
+        paidInAmount:
+          description: Total actual amount paid by the shareholder for their shares, including any share premium over the nominal/par value. This represents the real money invested. For example, if shares with €10,000 nominal value were purchased for €15,000, the paidInAmount would be €15,000. In Italy this corresponds to "valore versato", in Germany to "eingezahltes Kapital". This field captures the actual capital contribution to the company.
+          allOf:
+          - $ref: '#/components/schemas/MonetaryAmountDTO'
+      required:
+      - type
+    DataPointError:
+      type: object
+      properties:
+        code:
+          type: string
+          description: Error code identifying the type of failure
+          example: resource_not_found
+          enum:
+          - resource_not_found
+          - service_unavailable
+          - processing_failed
+          - invalid_request
+          - datapoint_not_supported
+          - fast_source_unavailable
+          - onboarding_timeout
+          - insufficient_funds
+        message:
+          type: string
+          description: User-friendly error message explaining the failure
+          example: The requested company was not found. Please verify the registration number and try again.
+        details:
           type: array
-          description: Methods that qualified this individual as UBO (only when isUbo is true)
+          description: Additional specific error details when applicable
           items:
             type: string
-            enum:
-            - accumulation
-            - domination
-        status:
+          example:
+          - Query must be at least 2 characters
+        source:
           type: string
-          description: Status of the node during graph building. `budget_truncated` marks a frontier company that was not fetched because the request ran out of credits; clients can submit a continuation request to expand it.
-          enum:
-          - pending
-          - found
-          - not_found
-          - error
-          - search_resolved
-          - placeholder
-          - budget_truncated
-    CompanyStatusDetailsDTO:
+          description: Source register that failed, when the failure is attributable to a specific external register
+          example: handelsregister
+        retryable:
+          type: boolean
+          description: Whether retrying the request may eventually succeed
+          example: true
+      required:
+      - code
+      - message
+    DataPointStatusEnriching:
       type: object
       properties:
+        cost:
+          type: number
+          description: The cost in credits for this data point or document
+          example: 10
+        costMarkup:
+          type: number
+          description: The percentage markup when final cost is not yet known
+          example: 20
         status:
           type: string
+          description: The data point has been retrieved and is being enriched with additional details
           enum:
-          - ACTIVE
-          - UNDER_INSOLVENCY_PROCEEDING
-          - INACTIVE_NOT_CLOSED
-          - PENDING_DISSOLUTION
-          - CLOSED
-          - UNKNOWN
-          example: ACTIVE
-          description: The standardized status of the company
-        closureReason:
-          type: string
-          enum:
-          - BANKRUPTCY
-          - LIQUIDATION
-          - MERGER
-          - ACQUISITION
-          - VOLUNTARY_DISSOLUTION
-          - ADMINISTRATIVE_DISSOLUTION
-          - COURT_ORDER
-          - SPLIT
-          - OTHER
-          - UNKNOWN
-          example: BANKRUPTCY
-          description: The reason for company closure, if applicable
-        closureDate:
-          type: string
-          example: '2024-01-15'
-          description: The date when the company was closed, if applicable
-        insolvencyStartDate:
-          type: string
-          example: '2023-12-01'
-          description: The date when insolvency proceedings started, if applicable
-        additionalInfo:
-          type: string
-          example: Company entered voluntary liquidation due to retirement of owner
-          description: Additional information about the status
+          - enriching
+          example: enriching
       required:
       - status
-    RepresentationModeDTO:
-      type: object
-      properties:
-        mode:
-          type: string
-          description: Whether this representative can act alone (sole) or must act jointly with others (joint)
-          enum:
-          - sole
-          - joint
-          example: sole
-        minimumSignatories:
-          type: number
-          description: Minimum number of signatories required for joint representation (e.g. 2 for "Kollektivzeichnung zu zweien")
-          example: 2
-        namedCoSigners:
-          description: Named co-signers this person must act with for joint representation
-          example:
-          - Kázsmér János
-          type: array
-          items:
-            type: string
-      required:
-      - mode
-    RangeDto:
-      type: object
-      properties:
-        lower:
-          type: number
-          description: Lower bound of the range
-          example: 25
-        upper:
-          type: number
-          description: Upper bound of the range
-          example: 50
-      required:
-      - lower
-      - upper
     PhysicalPersonBaseDTO:
       type: object
       properties:
@@ -2661,112 +2831,6 @@ components:
             type: string
           example:
             codiceFiscale: RSSMRA80A01H501U
-    FinancialInsightDTO:
-      type: object
-      properties:
-        category:
-          type: string
-          enum:
-          - liquidity
-          - profitability
-          - solvency
-          - efficiency
-          - growth
-          - risk
-        title:
-          type: string
-        description:
-          type: string
-        riskLevel:
-          type: string
-          enum:
-          - low
-          - medium
-          - high
-          - critical
-        metricValue:
-          type: string
-        recommendation:
-          type: string
-      required:
-      - category
-      - title
-      - description
-      - riskLevel
-    DataPointStatusEnriching:
-      type: object
-      properties:
-        cost:
-          type: number
-          description: The cost in credits for this data point or document
-          example: 10
-        costMarkup:
-          type: number
-          description: The percentage markup when final cost is not yet known
-          example: 20
-        status:
-          type: string
-          description: The data point has been retrieved and is being enriched with additional details
-          enum:
-          - enriching
-          example: enriching
-      required:
-      - status
-    ExtractedFinancialDataDTO:
-      type: object
-      properties:
-        fiscalYear:
-          type: object
-          description: Fiscal year period covered by the financial statement
-        approvalDate:
-          type: string
-        currency:
-          type: string
-        accountingStandard:
-          type: string
-          enum:
-          - IFRS
-          - French GAAP
-          - US GAAP
-          - Swiss GAAP
-          - Lux GAAP
-          - Other
-        statementType:
-          type: string
-          enum:
-          - consolidated
-          - simplified
-        analysis:
-          description: AI-generated financial analysis and insights
-          allOf:
-          - $ref: '#/components/schemas/FinancialAnalysisDTO'
-        incomeStatement:
-          type: object
-        balanceSheet:
-          type: object
-    DataPointStatusSucceeded:
-      type: object
-      properties:
-        cost:
-          type: number
-          description: The cost in credits for this data point or document
-          example: 10
-        costMarkup:
-          type: number
-          description: The percentage markup when final cost is not yet known
-          example: 20
-        status:
-          type: string
-          description: The data point completed successfully
-          enum:
-          - succeeded
-          example: succeeded
-        authoritative:
-          type: boolean
-          description: Whether the data comes from an authoritative official registry source
-          example: true
-      required:
-      - status
     FinancialAnalysisDTO:
       type: object
       properties:
@@ -2812,7 +2876,53 @@ components:
       - strengths
       - concerns
       - trends
-    DataPointStatusInProgress:
+    ControlDTO:
+      type: object
+      properties:
+        types:
+          type: array
+          description: Types of control held by the beneficial owner
+          items:
+            type: string
+            enum:
+            - ownership-of-shares
+            - voting-rights
+            - appoint-and-remove-directors
+            - significant-influence-or-control
+          example:
+          - ownership-of-shares
+        description:
+          type: string
+          description: Description of why the person is of significant control
+          example: The person holds more than 50% of the shares in the company.
+        details:
+          description: Details about the percentage of control
+          type: array
+          items:
+            $ref: '#/components/schemas/PercentageDetailDto'
+      required:
+      - types
+      - description
+    MonetaryAmountDTO:
+      type: object
+      properties:
+        amount:
+          type: number
+          description: The numeric amount of money.
+          example: 1000
+        currency:
+          type: string
+          description: The ISO 4217 currency code (e.g., EUR, USD).
+          example: EUR
+        formatted:
+          type: string
+          description: Formatted string representation of the monetary amount in the local format
+          example: 1000.00 €
+      required:
+      - amount
+      - currency
+      - formatted
+    DataPointStatusFailed:
       type: object
       properties:
         cost:
@@ -2825,279 +2935,51 @@ components:
           example: 20
         status:
           type: string
-          description: The data point is being retrieved
+          description: The data point retrieval failed
           enum:
-          - in_progress
-          example: in_progress
+          - failed
+          example: failed
+        error:
+          description: Error information for the failed data point
+          allOf:
+          - $ref: '#/components/schemas/DataPointError'
+        errors:
+          type: array
+          description: Deprecated - use error.message instead
+          deprecated: true
+          items:
+            type: string
       required:
       - status
-    LegalFormEnum:
-      type: string
-      enum:
-      - Sole Proprietorship
-      - Partnership
-      - Limited Liability Company
-      - Corporation
-      - Nonprofit Organization
-      - Cooperative
-      - Government-Owned Entity
-      - Branch or Representative Office
-      - Trust
-      - Other
-      description: The standardized legal form of the company.
-    OtherKeyPersonRoleDTO:
+      - error
+    CompanyRelationshipDTO:
       type: object
       properties:
-        localName:
-          type: string
-          description: The local role name in the local language
-          example: Commissaire aux comptes
-        englishTranslation:
-          type: string
-          description: The role name in English
-          example: Auditor
-        semaphoreStandard:
-          example: Board Member
-          description: The standardized role of the individual.
-          deprecated: true
-          allOf:
-          - $ref: '#/components/schemas/OtherKeyPersonRoleEnum'
-        standardized:
-          example: Board Member
-          description: The standardized role of the individual.
-          allOf:
-          - $ref: '#/components/schemas/OtherKeyPersonRoleEnum'
-      required:
-      - standardized
-    CountryIdentifiersDTO:
-      type: object
-      properties:
-        VAT:
-          type: string
-          description: 'Partita IVA (P.IVA) - VAT registration number. Format: 11 digits (e.g., "02580590541"). Issued by: Agenzia delle Entrate (Revenue Agency)'
-          example: 02580590541
-        Codice Fiscale:
-          type: string
-          description: 'Codice Fiscale - Tax identification code. Format: 16 alphanumeric characters for individuals (e.g., "RSSMRA70A01H501U"), 11 digits for companies (often same as VAT). Issued by: Agenzia delle Entrate (Revenue Agency)'
-          example: RSSMRA70A01H501U
-        CCIAA:
-          type: string
-          description: 'CCIAA - Camera di Commercio (Chamber of Commerce) province code. Format: 2-letter province code (e.g., "TO" for Torino, "MI" for Milano). Indicates which Chamber of Commerce the company is registered with.'
-          example: TO
-        REA Code:
-          type: string
-          description: 'REA Code - Registro Economico Amministrativo (Economic Administrative Register) number. Format: Numeric (e.g., "1234567"). Unique within each CCIAA province. Combined with CCIAA forms a unique identifier.'
-          example: '1234567'
-    EstablishmentDTO:
-      type: object
-      properties:
-        id:
-          type: string
-          description: Unique identifier for the establishment
-          example: EST-001
-        name:
-          type: string
-          description: The name of the establishment
-          example: Main Office
-        creationDate:
-          type: string
-          description: The creation date of the establishment
-          example: '2020-01-15'
-        endDate:
-          type: string
-          description: The closing date of the establishment (if applicable)
-          example: '2023-12-31'
-        active:
-          type: boolean
-          description: Whether the establishment is currently active
-          example: true
-        address:
-          description: The address of the establishment
-          allOf:
-          - $ref: '#/components/schemas/AddressDTO'
-        activities:
-          type: object
-          description: A dictionary of activity classifications for this establishment. In multi-establishment countries (e.g. France, Belgium) each site can carry its own activity codes, which may differ from the company-level activity.
-          example:
-            NACE:
-            - code: '62.01'
-              description: Computer programming activities
-            ISIC:
-            - code: J620
-              description: Computer programming, consultancy and related activities
-          additionalProperties:
-            type: array
-            items:
-              $ref: '#/components/schemas/CompanyActivityItemDTO'
-      required:
-      - name
-    RequestMetadataDTO:
-      type: object
-      properties:
-        companyId:
-          type: string
-          example: '932884117'
-          description: The requested company id.
-        countryCode:
+        relation:
           type: string
           enum:
-          - AT
-          - BE
-          - BG
-          - CH
-          - CN
-          - CZ
-          - CY
-          - DE
-          - DK
-          - EE
-          - ES
-          - FI
-          - FR
-          - GB
-          - GG
-          - GR
-          - HK
-          - HR
-          - HU
-          - IE
-          - IS
-          - IT
-          - JE
-          - LI
-          - LU
-          - LV
-          - MC
-          - MT
-          - MU
-          - NL
-          - 'NO'
-          - PL
-          - PT
-          - RO
-          - RU
-          - SE
-          - SG
-          - SI
-          - SK
-          - VG
-          example: FR
-          description: The requested country code.
-        requestId:
+          - mergedFrom
+          - mergedInto
+          - acquired
+          - acquiredBy
+          - demergedFrom
+          - demergedTo
+          - spunOffFrom
+          - spunOffTo
+          - assetTransferFrom
+          - assetTransferTo
+          - other
+        company:
+          $ref: '#/components/schemas/CompanyDTO'
+        effectiveDate:
           type: string
-          example: request-12345
-          description: The unique identifier for the request.
-        dataPoints:
-          type: array
-          items:
-            type: string
-        documents:
-          type: array
-          items:
-            type: string
-        dataStatus:
-          description: Indicates the status of data points and documents associated with the company. It states if the data has been retrieved, if a job is in progress for asynchronous data, or if a job there was an error.
-          allOf:
-          - $ref: '#/components/schemas/DataStatus'
-        metadata:
-          type: object
-          additionalProperties:
-            type: string
-          description: Arbitrary key-value string pairs provided at request creation time and echoed back in responses and webhooks.
-        enrichmentReport:
+          description: Legal effective date if known (YYYY-MM-DD)
+        description:
           type: string
-          description: A human-readable summary of the agentic enrichment step, explaining what additional data was found or why enrichment could not provide more details. Only present when agenticEnrichment was requested.
-        companyLegalName:
-          type: string
-          description: The legal name of the company, if known from search results.
-        workspace:
-          type: object
-          description: The workspace associated with this request. Only present if the account uses workspaces.
       required:
-      - countryCode
-    TaxIdDTO:
-      type: object
-      properties:
-        type:
-          type: string
-          description: Tax ID type (Stripe-aligned)
-          example: eu_vat
-        value:
-          type: string
-          description: Tax ID value WITHOUT country prefix
-          example: '27443061841'
-        country:
-          type: string
-          description: ISO2 country code
-          example: FR
-        verification:
-          description: Verification details for the tax ID
-          allOf:
-          - $ref: '#/components/schemas/TaxIdVerificationDTO'
-      required:
-      - type
-      - value
-      - country
-    DataStatus:
-      type: object
-      properties:
-        dataPoints:
-          type: object
-          description: Retrieval status of data points
-          additionalProperties:
-            oneOf:
-            - $ref: '#/components/schemas/DataPointStatusSucceeded'
-            - $ref: '#/components/schemas/DataPointStatusInProgress'
-            - $ref: '#/components/schemas/DataPointStatusEnriching'
-            - $ref: '#/components/schemas/DataPointStatusFailed'
-            discriminator:
-              propertyName: status
-              mapping:
-                succeeded: '#/components/schemas/DataPointStatusSucceeded'
-                in_progress: '#/components/schemas/DataPointStatusInProgress'
-                enriching: '#/components/schemas/DataPointStatusEnriching'
-                failed: '#/components/schemas/DataPointStatusFailed'
-        documents:
-          type: object
-          description: Retrieval status of documents
-          additionalProperties:
-            oneOf:
-            - $ref: '#/components/schemas/DataPointStatusSucceeded'
-            - $ref: '#/components/schemas/DataPointStatusInProgress'
-            - $ref: '#/components/schemas/DataPointStatusEnriching'
-            - $ref: '#/components/schemas/DataPointStatusFailed'
-            discriminator:
-              propertyName: status
-              mapping:
-                succeeded: '#/components/schemas/DataPointStatusSucceeded'
-                in_progress: '#/components/schemas/DataPointStatusInProgress'
-                enriching: '#/components/schemas/DataPointStatusEnriching'
-                failed: '#/components/schemas/DataPointStatusFailed'
-      required:
-      - dataPoints
-      - documents
-    AnnualFilingOverdueFlagDTO:
-      type: object
-      properties:
-        active:
-          type: boolean
-          example: true
-          description: Whether the signal is currently active (the annual filing is currently overdue).
-        dueDate:
-          type: string
-          example: '2024-03-01'
-          description: The date the filing was due (and missed), when the register reports it. ISO 8601 (YYYY-MM-DD).
-        since:
-          type: string
-          example: '2024-03-15'
-          description: The date the flag became active, when the register reports it. ISO 8601 (YYYY-MM-DD).
-        source:
-          type: string
-          example: companies_house
-          description: The register that reported the signal.
-      required:
-      - active
-    ArticleOfAssociationDTO:
+      - relation
+      - company
+    DocumentWithUrlDto:
       type: object
       properties:
         id:
@@ -3130,8 +3012,45 @@ components:
       required:
       - id
       - name
-      - format
-    DataPointStatusFailed:
+    PercentageDetailDto:
+      type: object
+      properties:
+        type:
+          type: string
+          description: Type of percentage detail (shares, voting rights)
+          enum:
+          - shares
+          - voting-rights
+          example: shares
+        percentageRange:
+          description: Range of control as a lower and upper bound
+          example:
+            lower: 25
+            upper: 50
+          allOf:
+          - $ref: '#/components/schemas/RangeDto'
+        percentageValue:
+          type: number
+          description: Exact percentage of control
+          example: 30
+        monetaryAmount:
+          description: Monetary amount of shares controlled
+          allOf:
+          - $ref: '#/components/schemas/MonetaryAmountDTO'
+        numberOfShares:
+          type: number
+          description: Number of shares controlled
+          example: 1000
+        nature:
+          type: string
+          description: Indicates whether the control is direct or indirect
+          enum:
+          - direct
+          - indirect
+          example: direct
+      required:
+      - type
+    DataPointStatusInProgress:
       type: object
       properties:
         cost:
@@ -3144,106 +3063,187 @@ components:
           example: 20
         status:
           type: string
-          description: The data point retrieval failed
+          description: The data point is being retrieved
           enum:
-          - failed
-          example: failed
-        error:
-          description: Error information for the failed data point
+          - in_progress
+          example: in_progress
+      required:
+      - status
+    PersonNameDTO:
+      type: object
+      properties:
+        title:
+          type: string
+          description: Title of the person (e.g., Mr., Mrs., Dr.)
+        firstName:
+          type: string
+          description: First name of the person
+        middleName:
+          type: string
+          description: Middle name of the person
+        lastName:
+          type: string
+          description: Last name of the person
+        fullName:
+          type: string
+          description: Full name of the person
+        suffix:
+          type: string
+          description: Suffix of the name (e.g., Jr., Sr., III)
+      required:
+      - fullName
+    GetCompanyResultDTO:
+      type: object
+      properties:
+        request:
+          description: The request
           allOf:
-          - $ref: '#/components/schemas/DataPointError'
-        errors:
-          type: array
-          description: Deprecated - use error.message instead
-          deprecated: true
-          items:
-            type: string
-      required:
-      - status
-      - error
-    ControlDTO:
-      type: object
-      properties:
-        types:
-          type: array
-          description: Types of control held by the beneficial owner
-          items:
-            type: string
-            enum:
-            - ownership-of-shares
-            - voting-rights
-            - appoint-and-remove-directors
-            - significant-influence-or-control
-          example:
-          - ownership-of-shares
-        description:
-          type: string
-          description: Description of why the person is of significant control
-          example: The person holds more than 50% of the shares in the company.
-        details:
-          description: Details about the percentage of control
-          type: array
-          items:
-            $ref: '#/components/schemas/PercentageDetailDto'
-      required:
-      - types
-      - description
-    CompanyRelationshipDTO:
-      type: object
-      properties:
-        relation:
-          type: string
-          enum:
-          - mergedFrom
-          - mergedInto
-          - acquired
-          - acquiredBy
-          - demergedFrom
-          - demergedTo
-          - spunOffFrom
-          - spunOffTo
-          - assetTransferFrom
-          - assetTransferTo
-          - other
+          - $ref: '#/components/schemas/RequestMetadataDTO'
         company:
-          $ref: '#/components/schemas/CompanyDTO'
-        effectiveDate:
+          description: The main profile information of the company, including, if available, details such as name, registration number, address, and other core data.
+          allOf:
+          - $ref: '#/components/schemas/CompanyDTO'
+        ultimateBeneficialOwners:
+          description: The persons of significant control of the company, including, if available, their name, nationality, and other relevant details.
+          type: array
+          items:
+            $ref: '#/components/schemas/UltimateBeneficialOwnerDTO'
+        legalRepresentatives:
+          description: The legal representatives of the company, which can be either individuals or companies.
+          type: array
+          items:
+            $ref: '#/components/schemas/LegalRepresentativeDTO'
+        shareholders:
+          description: The shareholders of the company, which can be either individuals or companies.
+          type: array
+          items:
+            $ref: '#/components/schemas/ShareholderDTO'
+        subsidiaries:
+          description: Companies in which the queried company holds equity (downstream participations). Includes any equity stake regardless of size — the relationship classification (controlled, associated, minority investment) is derived from sharePercentage by the consumer.
+          type: array
+          items:
+            $ref: '#/components/schemas/SubsidiaryDTO'
+        establishments:
+          description: The establishments of the company, including physical locations where business activities are conducted.
+          type: array
+          items:
+            $ref: '#/components/schemas/EstablishmentDTO'
+        otherKeyPersons:
+          description: Other key persons associated with the company who do not have legal signing authority, such as board members, auditors, and compliance officers.
+          type: array
+          items:
+            $ref: '#/components/schemas/OtherKeyPersonDTO'
+        graph:
+          description: 'Ownership graph: the entities (`nodes`) and ownership relationships (`edges`) discovered while traversing the company structure, plus a human-readable `description`, a `mermaidDiagram` rendering, and traversal `metadata`. Individual nodes carry UBO flags (`flags.isUbo`, `flags.uboCalculationMethod`) and `totalOwnershipPercentage`.'
+          allOf:
+          - $ref: '#/components/schemas/EnhancedGraphResultDTO'
+        documents:
+          $ref: '#/components/schemas/DocumentsDTO'
+        companyRelationships:
+          type: array
+          items:
+            $ref: '#/components/schemas/CompanyRelationshipDTO'
+        dataSources:
+          description: Per-field data source provenance for each entity. Keys are field names, values describe the origin of the data.
+          allOf:
+          - $ref: '#/components/schemas/DataSourcesDTO'
+        enrichmentReport:
           type: string
-          description: Legal effective date if known (YYYY-MM-DD)
-        description:
-          type: string
+          description: Human-readable summary of enrichment results when agenticEnrichment was requested.
       required:
-      - relation
-      - company
-    TaxIdVerificationDTO:
+      - request
+    AddressDTO:
       type: object
       properties:
-        status:
+        addressLine1:
+          type: string
+          description: First line of the address
+          example: 10 rue de la Fraternité
+        addressLine2:
+          type: string
+          description: Second line of the address
+          example: Topograph Building
+        city:
+          type: string
+          description: City of the address
+          example: Bagnolet
+        postalCode:
+          type: string
+          description: Postal code of the address
+          example: '93170'
+        region:
+          type: string
+          description: Region of the address
+          example: FR
+        countryCode:
+          type: string
+          description: Country of the address using ISO 3166-1 alpha-2 country code
+          example: FR
+        poBox:
+          type: string
+          description: Post Office Box number
+          example: PO Box 123
+        careOf:
+          type: string
+          description: Care of (c/o) recipient
+          example: c/o John Doe
+        state:
+          type: string
+          description: State of the address
+          example: Île-de-France
+        latitude:
+          type: number
+          description: Latitude coordinate
+          example: 59.9139
+        longitude:
+          type: number
+          description: Longitude coordinate
+          example: 10.7522
+    OtherKeyPersonDTO:
+      type: object
+      properties:
+        entityId:
+          type: string
+          description: Unique identifier to track the same person or company across different roles (legal representatives, shareholders, UBOs, etc.). Since data is retrieved from multiple registries, the same entity may appear with slightly different names or details. This ID allows you to identify that "John Smith" as a legal representative is the same person as "J. Smith" listed as a shareholder.
+          example: person_001
+        role:
+          description: The role of the other key person
+          allOf:
+          - $ref: '#/components/schemas/OtherKeyPersonRoleDTO'
+        startDate:
+          type: string
+          description: The start date of the role
+          example: '2022-01-01'
+        endDate:
+          type: string
+          description: The end date of the role (if applicable)
+          example: '2023-12-31'
+        type:
           type: string
           enum:
-          - verified
-          - unverified
-          - unavailable
-          description: Verification status of the tax ID
-          example: verified
-        verifiedAt:
-          type: string
-          description: ISO date when the tax ID was verified
-          example: '2024-01-15T10:30:00Z'
-        verifiedName:
-          type: string
-          description: Company name returned by the validation service (e.g., VIES)
-          example: TOPOGRAPH SAS
-        verifiedAddress:
-          type: string
-          description: Address returned by the validation service (e.g., VIES)
-          example: 123 RUE DE PARIS, 75001 PARIS
-        consultationNumber:
-          type: string
-          description: VIES consultation number (requestIdentifier) - the legal proof of validation for audit purposes
-          example: WAPIAAAAW1234567890
+          - individual
+          - company
+          description: The type of the other key person (individual or company)
+          example: individual
+        individual:
+          description: Details if the other key person is an individual
+          allOf:
+          - $ref: '#/components/schemas/PhysicalPersonBaseDTO'
+        company:
+          description: Details if the other key person is a company
+          allOf:
+          - $ref: '#/components/schemas/CompanyDTO'
       required:
-      - status
+      - type
+    GetCompanyRequestResultDTO:
+      type: object
+      properties:
+        requestId:
+          type: string
+          example: 123e4567-e89b-12d3-a456-426614174000
+          description: Optional UUID that references a previous request. When provided, returns cached data from that specific request instead of fetching fresh data.
+      required:
+      - requestId
   securitySchemes:
     x-api-key:
       type: apiKey

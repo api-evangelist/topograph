@@ -211,75 +211,6 @@ paths:
       - Monitors
 components:
   schemas:
-    CreateMonitorResponseDto:
-      type: object
-      properties:
-        id:
-          type: string
-          description: The unique identifier for the monitor
-          example: cmfzlu1dt000j12ldeqrfszq0
-        companyId:
-          type: string
-          description: The company ID being monitored
-          example: '123456789'
-        countryCode:
-          type: string
-          description: The country code for the monitored company
-          example: DE
-        metadata:
-          type: object
-          additionalProperties:
-            type: string
-          example:
-            caseId: case-12345
-          description: Key-value pairs provided at monitor creation, echoed back in responses and monitor.notification webhooks.
-      required:
-      - id
-      - companyId
-      - countryCode
-    ListMonitorsResponseDto:
-      type: object
-      properties:
-        monitors:
-          description: List of monitored companies
-          type: array
-          items:
-            $ref: '#/components/schemas/MonitorDto'
-        total:
-          type: number
-          description: Total number of monitors
-          example: 10
-        hasNextPage:
-          type: boolean
-          description: Whether there is a next page available
-          example: true
-        nextCursor:
-          type: string
-          description: Cursor for the next page
-          example: cmfzlu1dt000j12ldeqrfszq0
-      required:
-      - monitors
-      - total
-      - hasNextPage
-    MonitorLogsResponseDto:
-      type: object
-      properties:
-        logs:
-          description: List of monitor log entries
-          type: array
-          items:
-            $ref: '#/components/schemas/MonitorLogDto'
-        hasNextPage:
-          type: boolean
-          description: Whether there is a next page available
-          example: true
-        nextCursor:
-          type: string
-          description: Cursor for the next page
-          example: cmfzlu1dt000j12ldeqrfszq0
-      required:
-      - logs
-      - hasNextPage
     MonitorLogDto:
       type: object
       properties:
@@ -324,6 +255,32 @@ components:
       - changeCategories
       - fetchStatus
       - createdAt
+    CreateMonitorResponseDto:
+      type: object
+      properties:
+        id:
+          type: string
+          description: The unique identifier for the monitor
+          example: cmfzlu1dt000j12ldeqrfszq0
+        companyId:
+          type: string
+          description: The company ID being monitored
+          example: '123456789'
+        countryCode:
+          type: string
+          description: The country code for the monitored company
+          example: DE
+        metadata:
+          type: object
+          additionalProperties:
+            type: string
+          example:
+            caseId: case-12345
+          description: Key-value pairs provided at monitor creation, echoed back in responses and monitor.notification webhooks.
+      required:
+      - id
+      - companyId
+      - countryCode
     CreateMonitorDto:
       type: object
       properties:
@@ -387,38 +344,6 @@ components:
       required:
       - companyId
       - countryCode
-    MonitorDto:
-      type: object
-      properties:
-        id:
-          type: string
-          description: The unique identifier for the monitor
-          example: cmfzlu1dt000j12ldeqrfszq0
-        companyId:
-          type: string
-          description: The company ID being monitored
-          example: '123456789'
-        countryCode:
-          type: string
-          description: The country code for the monitored company
-          example: DE
-        companyName:
-          type:
-          - string
-          - 'null'
-          description: The legal name of the monitored company
-          example: Topograph SAS
-        metadata:
-          type: object
-          additionalProperties:
-            type: string
-          example:
-            caseId: case-12345
-          description: Key-value pairs provided at monitor creation, echoed back in responses and monitor.notification webhooks.
-      required:
-      - id
-      - companyId
-      - countryCode
     MonitorDetailsResponseDto:
       type: object
       properties:
@@ -462,6 +387,81 @@ components:
       - companyId
       - countryCode
       - createdAt
+    ListMonitorsResponseDto:
+      type: object
+      properties:
+        monitors:
+          description: List of monitored companies
+          type: array
+          items:
+            $ref: '#/components/schemas/MonitorDto'
+        total:
+          type: number
+          description: Total number of monitors
+          example: 10
+        hasNextPage:
+          type: boolean
+          description: Whether there is a next page available
+          example: true
+        nextCursor:
+          type: string
+          description: Cursor for the next page
+          example: cmfzlu1dt000j12ldeqrfszq0
+      required:
+      - monitors
+      - total
+      - hasNextPage
+    MonitorDto:
+      type: object
+      properties:
+        id:
+          type: string
+          description: The unique identifier for the monitor
+          example: cmfzlu1dt000j12ldeqrfszq0
+        companyId:
+          type: string
+          description: The company ID being monitored
+          example: '123456789'
+        countryCode:
+          type: string
+          description: The country code for the monitored company
+          example: DE
+        companyName:
+          type:
+          - string
+          - 'null'
+          description: The legal name of the monitored company
+          example: Topograph SAS
+        metadata:
+          type: object
+          additionalProperties:
+            type: string
+          example:
+            caseId: case-12345
+          description: Key-value pairs provided at monitor creation, echoed back in responses and monitor.notification webhooks.
+      required:
+      - id
+      - companyId
+      - countryCode
+    MonitorLogsResponseDto:
+      type: object
+      properties:
+        logs:
+          description: List of monitor log entries
+          type: array
+          items:
+            $ref: '#/components/schemas/MonitorLogDto'
+        hasNextPage:
+          type: boolean
+          description: Whether there is a next page available
+          example: true
+        nextCursor:
+          type: string
+          description: Cursor for the next page
+          example: cmfzlu1dt000j12ldeqrfszq0
+      required:
+      - logs
+      - hasNextPage
   securitySchemes:
     x-api-key:
       type: apiKey
