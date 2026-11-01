@@ -64,6 +64,151 @@
 > Full detail: **[Where this data comes from](https://apievangelist.com/about/where-our-data-comes-from)**
 <!-- API-EVANGELIST-PROVENANCE:END -->
 
-Topograph is a company surfaced as a portfolio company of seedcamp and added to the API Evangelist network as a stub for enrichment. This profile is a lead awaiting the enrichment pipeline.
+Topograph is a KYB (Know Your Business) data platform that connects directly to official European and international business registers (35+ countries) for real-time company verification. It provides company data and official documents with source-traceable provenance, ownership-graph analysis across shareholders, ultimate beneficial owners and subsidiaries, cross-border entity resolution, and continuous change monitoring delivered over webhooks. Built for fintechs, neobanks and compliance software vendors, Topograph is exposed as a REST API (x-api-key) with a published MCP server, an x402 agentic-commerce surface, and pay-per-request pricing, backed by SOC 2 Type 2 and ISO 27001:2022 certifications.
 
-Backed by: seedcamp — http://topograph.co
+**Areas:** Company · KYB · Company Data · Business Registers · Compliance · Identity Verification · Beneficial Ownership · AML · Due Diligence · Fintech
+
+## Topograph on APIs.io
+
+Everything profiled for Topograph is published on APIs.io rather than in this repository. Start at the provider page — **[apis.io/providers/topograph/](https://apis.io/providers/topograph/)** — or go straight to one of the APIs or properties below.
+
+### APIs (7)
+
+- [Topograph Billing API](https://apis.io/apis/topograph/topograph-billing-api/) — The Billing API from Topograph — 1 operation(s) for billing.
+- [Topograph Billing Notifications API](https://apis.io/apis/topograph/topograph-billing-notifications-api/) — The Billing Notifications API from Topograph — 3 operation(s) for billing notifications.
+- [Topograph Data API](https://apis.io/apis/topograph/topograph-data-api/) — The Data API from Topograph — 3 operation(s) for data.
+- [Topograph Monitors API](https://apis.io/apis/topograph/topograph-monitors-api/) — The Monitors API from Topograph — 3 operation(s) for monitors.
+- [Topograph Pricing API](https://apis.io/apis/topograph/topograph-pricing-api/) — The Pricing API from Topograph — 1 operation(s) for pricing.
+- [Topograph Search API](https://apis.io/apis/topograph/topograph-search-api/) — The Search API from Topograph — 1 operation(s) for search.
+- [Topograph Workspaces API](https://apis.io/apis/topograph/topograph-workspaces-api/) — The Workspaces API from Topograph — 3 operation(s) for workspaces.
+
+### Published properties
+
+Each property below is a page on APIs.io carrying the machine-readable artifact and what it says.
+
+#### Arazzo workflows (2)
+
+Multi-step workflows that chain operations into a business task.
+
+- [Monitor a company for register changes](https://apis.io/arazzos/topograph/topograph-monitor-company/)
+- [Resolve a company and retrieve KYB data](https://apis.io/arazzos/topograph/topograph-resolve-and-retrieve/)
+
+#### AsyncAPI (1)
+
+Event-driven and webhook contracts.
+
+- [Topograph Monitoring Webhooks](https://apis.io/asyncapis/topograph/topograph-monitoring-webhooks/)
+
+#### MCP servers (1)
+
+Model Context Protocol servers that expose the API to agents.
+
+- [topograph](https://apis.io/servers/topograph/topograph/)
+
+#### Agentic access (1)
+
+Which operations an agent can call, which act, and which need a human in the loop.
+
+- [Topograph Agentic Access](https://apis.io/agentic-access/topograph/topograph-agentic-access/)
+
+#### Collections (7)
+
+Postman and Open Collection request collections.
+
+- [Topograph Billing API](https://apis.io/collections/topograph/open-topograph-billing-api/)
+- [Topograph Billing Billing Notifications API](https://apis.io/collections/topograph/open-topograph-billing-notifications-api/)
+- [Topograph Billing Data API](https://apis.io/collections/topograph/open-topograph-data-api/)
+- [Topograph Billing Monitors API](https://apis.io/collections/topograph/open-topograph-monitors-api/)
+- [Topograph Billing Pricing API](https://apis.io/collections/topograph/open-topograph-pricing-api/)
+- [Topograph Billing Search API](https://apis.io/collections/topograph/open-topograph-search-api/)
+- [Topograph Billing Workspaces API](https://apis.io/collections/topograph/open-topograph-workspaces-api/)
+
+#### Overlays (1)
+
+OpenAPI overlays, including conversational phrasing for each operation.
+
+- [Topograph Openapi Overlay](https://apis.io/overlays/topograph/topograph-openapi-overlay/)
+
+#### Security (3)
+
+Authentication, trust centre, and vulnerability disclosure.
+
+- [Topograph Authentication](https://apis.io/security/topograph/topograph-authentication/)
+- [Topograph Domain Security](https://apis.io/security/topograph/topograph-domain-security/)
+- [Topograph Trust Center](https://apis.io/security/topograph/topograph-trust-center/)
+
+#### OAuth scopes (1)
+
+The permissions the API asks for.
+
+- [Topograph Scopes](https://apis.io/scopes/topograph/topograph-scopes/)
+
+## Where to find this API
+
+Links to the company's own pages. This repository publishes no copy of their specifications — the canonical document is theirs and lives at the URLs below.
+
+- [Website](http://topograph.co)
+- [Documentation](https://docs.topograph.co)
+- [Getting started](https://docs.topograph.co/quickstart)
+- [API reference](https://docs.topograph.co/api-reference)
+- [Pricing](https://topograph.co/pricing)
+- [Sign up](https://app.topograph.co)
+- [Blog](https://topograph.co/blog)
+- [Terms of service](https://topograph.co/terms-of-service)
+- [Privacy policy](https://topograph.co/privacy-policy)
+- [Status](https://status.topograph.co/)
+
+## API Evangelist rating
+
+**Kin Score 56.8** — strong · rubric 0.25.0 · scored 2026-10-23
+
+| Facet | Score |
+|---|---|
+| Discoverability | 75.0 |
+| Contract quality | 55.8 |
+| Contract governance | 18.2 |
+| Operational transparency | 39.5 |
+| Developer ergonomics | 54.2 |
+| Access clarity | 60.5 |
+
+**Agent readiness 57.3** — agent-ready (gated down from agent-native)
+
+| Agent-readiness dimension | Result |
+|---|---|
+| Spec Presence | yes |
+| Agentic Access | derived (partial credit) |
+| Reversibility Documented | — |
+| MCP Server | verified |
+| Auth Clarity | served (partial credit) |
+| Idempotency | documented (partial credit) |
+| Error Semantics | derived (partial credit) |
+| OpenAPI Examples | partial |
+| Rate Limit Signal | — |
+| Event Surface Described | yes |
+| Agent Skills | derived (partial credit) |
+| Well Known Catalog | yes |
+| Consent Identity | — |
+| Agent Card | — |
+| Dry Run Mode | — |
+| Delegated Identity | served (partial credit) |
+| Protected Resource Metadata | verified |
+| Dynamic Client Registration | yes |
+| Agentic Commerce | — |
+| Pagination Ratio | partial |
+| Operation Distinctiveness | distinct |
+
+**Regulatory alignment 39.2** — Horizontal (data, software, accessibility, platform)
+
+The rubric is published at [github.com/api-evangelist/kin-score](https://github.com/api-evangelist/kin-score). The per-check breakdown behind these numbers — which checks were earned, partial or missed — along with score history and how this provider compares to its peers, is available at [apis.io/providers/topograph/](https://apis.io/providers/topograph/).
+
+## How this profile is made
+
+API Evangelist profiles a company's public API surface the way a developer would find it: the website, developer portal and documentation, the specifications it publishes, its public repositories, and its pricing, status and changelog pages. From that it derives the properties above — contracts split per API, workflows, schemas, collections, governance rules, plans and rate limits — and scores them against the published [Kin Score rubric](https://github.com/api-evangelist/kin-score).
+
+The artifacts are published on [APIs.io](https://apis.io), not in this repository. This repository is the public record for Topograph: the place to say something is wrong, missing or out of date, and to ask for a re-score or a removal.
+
+## Open an issue
+
+- **Something about this listing** — a wrong description, a missing API, a stale artifact or a question about the rating: [open an issue on this repository](https://github.com/api-evangelist/topograph/issues/new).
+- **A new API, or one that is not in the catalog yet** — [submit it on APIs.io](https://apis.io/add/).
+- **Anything else** — [the APIs.io inbox](https://github.com/api-search/inbox/issues/new) or [info@apievangelist.com](mailto:info@apievangelist.com).
